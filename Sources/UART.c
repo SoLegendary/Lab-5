@@ -31,9 +31,6 @@ OS_THREAD_STACK(FIFOGetThreadStack, THREAD_STACK_SIZE);
 static ECB* FIFOPutSemaphore = OS_SemaphoreCreate(0);
 static ECB* FIFOGetSemaphore = OS_SemaphoreCreate(0);
 
-// Semaphore for signaling by FIFO threads - allowing main to know when to check for a packet available
-static ECB* UARTSemaphore;
-
 
 
 /*! @brief Thread to put data into the FIFO
@@ -42,11 +39,8 @@ static void FIFOPutThread(void* pData)
 {
   for (;;)
   {
-    OS_SemaphoreWait(FIFOPutSemaphore);
+    OS_SemaphoreWait(FIFOPutSemaphore,0);
     FIFO_Put(&RxFIFO, UART2_D); // Put a character into the receive FIFO
-
-    // Signal PacketThread in main to continue building the packet
-    OS_SemaphoreSignal(UARTSemaphore);
   }
 }
 
@@ -57,7 +51,7 @@ static void FIFOGetThread(void* pData)
 {
   for (;;)
   {
-    OS_SemaphoreWait(FIFOGetSemaphore);
+    OS_SemaphoreWait(FIFOGetSemaphore,0);
     FIFO_Get(&TxFIFO, (uint8_t *)&UART2_D); // Get a character from the transfer FIFO
   }
 }
@@ -68,13 +62,12 @@ static void FIFOGetThread(void* pData)
  * Initializing the UART
  * send parameters: baudRate = 115200, moduleClk = CPU_BUS_CLK_HZ (20,971,520 Hz)
  */
-bool UART_Init(const uint32_t baudRate, const uint32_t moduleClk, ECB* semaphore)
+bool UART_Init(const uint32_t baudRate, const uint32_t moduleClk)
 {
   FIFO_Init(&TxFIFO); //Initialization of Transfer FIFO
   FIFO_Init(&RxFIFO); //Initialization of Receiver FIFO
 
   OS_ERROR error; // error object for RTOS
-  UARTSemaphore = semaphore;
 
   // creating FIFO threads
   error = OS_ThreadCreate(FIFOPutThread,
@@ -180,6 +173,8 @@ void UART_Poll(void)
 
 void __attribute__ ((interrupt)) UART_ISR(void)
 {
+  OS_ISREnter();
+	
   if (UART2_C2 & UART_C2_RIE_MASK) // If the interrupt was due to receiving a character
   {
     if (UART2_S1 & UART_S1_RDRF_MASK) // If PC->Tower data is waiting to be read, put a character into the receive FIFO
@@ -191,6 +186,8 @@ void __attribute__ ((interrupt)) UART_ISR(void)
     if (UART2_S1 & UART_S1_TDRE_MASK) // If Tower->PC data is waiting to be read, get a character out of the transfer FIFO
       OS_SemaphoreSignal(FIFOGetSemaphore);
   }
+  
+  OS_ISRExit();
 }
 
 

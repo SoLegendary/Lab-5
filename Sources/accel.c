@@ -306,9 +306,13 @@ void Accel_SetMode(const TAccelMode mode)
 
 void __attribute__ ((interrupt)) AccelDataReady_ISR(void)
 {
+  OS_ISREnter();
+	
   // clear interrupt flag for INT1 (PTB4)
   PORTB_PCR4 &= ~PORT_PCR_ISF_MASK;
 
   // Allow AccelThread to run
   OS_SemaphoreSignal(DataReadySemaphore);
+  
+  OS_ISRExit();
 }

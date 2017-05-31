@@ -262,6 +262,8 @@ void I2C_IntRead(const uint8_t registerAddress, uint8_t* const data, const uint8
 
 void __attribute__ ((interrupt)) I2C_ISR(void)
 {
+  OS_ISREnter();
+	
   I2C0_S |= I2C_S_IICIF_MASK; // w1c interrupt flag
   static uint8_t dataIndex = 0; // index to data pointer
   
@@ -294,6 +296,8 @@ void __attribute__ ((interrupt)) I2C_ISR(void)
         dataIndex++;
     }
   }
+  
+  OS_ISRExit();
 }
 
 

@@ -101,11 +101,15 @@ void RTC_Get(uint8_t* const hours, uint8_t* const minutes, uint8_t* const second
 
 void __attribute__ ((interrupt)) RTC_ISR(void)
 {
+  OS_ISREnter();
+	
   // Every second an interrupt should happen when the clock increments by 1 second
   // According to the TSIE register bit, there is no corresponding flag to clear
 
   // Allow RTCThread to run
   OS_SemaphoreSignal(RTCSemaphore);
+  
+  OS_ISRExit();
 }
 
 

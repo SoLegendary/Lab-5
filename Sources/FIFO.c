@@ -37,10 +37,10 @@ void FIFO_Init(TFIFO * const FIFO)
 bool FIFO_Put(TFIFO * const FIFO, const uint8_t data)
 {
   // If the FIFO has room, it places some data in to it and returns true.
-  OS_SemaphoreWait(FIFOAccess); // wait to get exclusive access
+  OS_SemaphoreWait(FIFOAccess,0); // wait to get exclusive access
 
   // Increments the number of bytes
-  OS_SemaphoreWait(FIFO->FreeBytes);
+  OS_SemaphoreWait(FIFO->FreeBytes,0);
   OS_SemaphoreSignal(FIFO->UsedBytes);
 
   // Put data in and increment end index
@@ -60,10 +60,10 @@ bool FIFO_Put(TFIFO * const FIFO, const uint8_t data)
 
 bool FIFO_Get(TFIFO * const FIFO, uint8_t * const dataPtr)
 {
-  OS_SemaphoreWait(FIFOAccess); // wait to get exclusive access
+  OS_SemaphoreWait(FIFOAccess,0); // wait to get exclusive access
 
   // Decrements the number of bytes
-  OS_SemaphoreWait(FIFO->UsedBytes);
+  OS_SemaphoreWait(FIFO->UsedBytes,0);
   OS_SemaphoreSignal(FIFO->FreeBytes);
 
   // Take data out and increment start index

@@ -145,6 +145,8 @@ bool FTM_StartTimer(const TFTMChannel* const aFTMChannel)
 
 void __attribute__ ((interrupt)) FTM0_ISR(void)
 {
+  OS_ISREnter();
+	
   // Checks for the interrupt source from each channel - probably only need 1 channel for lab 3 anyway
   for (uint8_t channelNb = 0; channelNb < 8; channelNb++)
   {
@@ -156,6 +158,8 @@ void __attribute__ ((interrupt)) FTM0_ISR(void)
          (FTM0_CnSC(channelNb) & FTM_CnSC_MSA_MASK))
       OS_SemaphoreSignal(FTMSemaphore[channelNb]);
   }
+  
+  OS_ISRExit();
 }
 
 

@@ -84,12 +84,12 @@ OS_THREAD_STACK(I2CThreadStack, THREAD_STACK_SIZE);
 
 
 // RTOS Semaphores - all initialised as 0 (ie. threads can't run before being signaled)
-OS_ECB* RTCSemaphore = OS_SemaphoreCreate(0);
+OS_ECB* RTCSemaphore    = OS_SemaphoreCreate(0);
 OS_ECB* PacketSemaphore = OS_SemaphoreCreate(0);
-OS_ECB* FTM0Semaphore = OS_SemaphoreCreate(0);
-OS_ECB* PITSemaphore = OS_SemaphoreCreate(0);
-OS_ECB* AccelSemaphore = OS_SemaphoreCreate(0);
-OS_ECB* I2CSemaphore = OS_SemaphoreCreate(0);
+OS_ECB* FTM0Semaphore   = OS_SemaphoreCreate(0);
+OS_ECB* PITSemaphore    = OS_SemaphoreCreate(0);
+OS_ECB* AccelSemaphore  = OS_SemaphoreCreate(0);
+OS_ECB* I2CSemaphore    = OS_SemaphoreCreate(0);
 
 
 // Function Initializations
@@ -447,7 +447,7 @@ static void RTCThread(void* pData)
   for (;;)
   {
     // wait for RTC_ISR to signal
-    OS_SemaphoreWait(RTCSemaphore);
+    OS_SemaphoreWait(RTCSemaphore,0);
 
     // Get and send time back to PC, just as in HandleSetTimePacket
     uint8_t seconds, minutes, hours;
@@ -459,22 +459,6 @@ static void RTCThread(void* pData)
 }
 
 
-/*! @brief Thread to handle packets taken from the FIFO
- */
-static void PacketThread(void* pData)
-{
-  for (;;)
-  {
-    // wait for FIFO or UART to signal
-    OS_SemaphoreWait(PacketSemaphore);
-
-    if (Packet_Get()) // If a packet is received.
-      HandlePacket(); // Handle the packet appropriately.
-  }
-}
-
-
-
 /*! @brief Thread to do something once the FTM0 timer expires
  */
 static void FTM0Thread(void* pData)
@@ -482,7 +466,7 @@ static void FTM0Thread(void* pData)
   for (;;)
   {
     // wait for FTM0_ISR to signal
-    OS_SemaphoreWait(FTM0Semaphore);
+    OS_SemaphoreWait(FTM0Semaphore,0);
 
     LEDs_Off(LED_BLUE);
   }
@@ -496,7 +480,7 @@ static void PITThread(void* pData)
   for (;;)
   {
     // wait for PIT_ISR to signal
-    OS_SemaphoreWait(PITSemaphore);
+    OS_SemaphoreWait(PITSemaphore,0);
 
     // shift new data into old before getting new data
     accelDataOld.bytes[0] = accelDataNew.bytes[0];
@@ -523,7 +507,7 @@ static void AccelThread(void* pData)
   for (;;)
   {
     // wait for FIFO or UART to signal
-    OS_SemaphoreWait(AccelSemaphore);
+    OS_SemaphoreWait(AccelSemaphore,0);
 
     Accel_ReadXYZ(accelDataNew.bytes);
   }
@@ -537,7 +521,7 @@ static void I2CThread(void* pData)
   for (;;)
   {
     // wait for FIFO or UART to signal
-    OS_SemaphoreWait(I2CSemaphore);
+    OS_SemaphoreWait(I2CSemaphore,0);
 
     // This thread copies some code from Accel_ReadXYZ due to order problems with synchronous mode
 
@@ -567,6 +551,18 @@ static void I2CThread(void* pData)
 }
 
 
+/*! @brief Thread to handle packets taken from the FIFO
+ *  does not wait for any semaphore (ie. would run forever), but has lowest priority
+ *  and so can be interrupted by any ISR and be placed on waiting for any other thread
+ */
+static void PacketThread(void* pData)
+{
+  for (;;)
+  {
+    if (Packet_Get()) // If a packet is received.
+      HandlePacket(); // Handle the packet appropriately.
+  }
+}
 
 
 
@@ -602,33 +598,35 @@ int main(void)
           &RTCThreadStack[THREAD_STACK_SIZE - 1],
 	  1);
 
+	  
   // threads 2 & 3 are inside UART.c
-
-  error = OS_ThreadCreate(PacketThread,
-          NULL,
-          &PacketThreadStack[THREAD_STACK_SIZE - 1],
-	  4);
+  
 
   error = OS_ThreadCreate(FTM0Thread,
           NULL,
           &FTM0ThreadStack[THREAD_STACK_SIZE - 1],
-	  5);
+	  4);
 
   error = OS_ThreadCreate(PITThread,
           NULL,
           &PITThreadStack[THREAD_STACK_SIZE - 1],
-	  6);
+	  5);
 
   error = OS_ThreadCreate(AccelThread,
           NULL,
           &AccelThreadStack[THREAD_STACK_SIZE - 1],
-	  7);
+	  6);
 
   error = OS_ThreadCreate(I2CThread,
           NULL,
           &I2CThreadStack[THREAD_STACK_SIZE - 1],
+	  7);
+	  
+  error = OS_ThreadCreate(PacketThread,
+          NULL,
+          &PacketThreadStack[THREAD_STACK_SIZE - 1],
 	  8);
-
+	  
   // Start multithreading - never returns!
   // NOTE that this still runs threads that are created in lower levels inside modules
   OS_Start();

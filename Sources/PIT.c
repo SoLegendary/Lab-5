@@ -90,11 +90,15 @@ void PIT_Enable(const bool enable)
 
 void __attribute__ ((interrupt)) PIT_ISR(void)
 {
+  OS_ISREnter();
+	
   // Clear the interrupt flag
   PIT_TFLG0 |= PIT_TFLG_TIF_MASK;
 
   // Signal the semaphore, allowing PITThread to run
-  OS_SemaphoreSignal(semaphore);
+  OS_SemaphoreSignal(PITSemaphore);
+  
+  OS_ISRExit();
 }
 
 

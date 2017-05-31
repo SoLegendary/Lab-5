@@ -14,14 +14,16 @@
 // new types
 #include "types.h"
 
+
 /*! @brief Sets up the UART interface before first use.
  *
  *  @param baudRate The desired baud rate in bits/sec.
  *  @param moduleClk The module clock rate in Hz.
+ *  @param semaphore Semaphore for signaling by FIFO threads - allowing main to know when to check for a packet available
  *  @return bool - TRUE if the UART was successfully initialized.
  */
-bool UART_Init(const uint32_t baudRate, const uint32_t moduleClk);
- 
+bool UART_Init(const uint32_t baudRate, const uint32_t moduleClk, ECB* semaphore);
+
 /*! @brief Get a character from the receive FIFO if it is not empty.
  *
  *  @param dataPtr A pointer to memory to store the retrieved byte.

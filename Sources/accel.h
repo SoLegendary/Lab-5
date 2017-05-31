@@ -17,6 +17,7 @@
 
 // New types
 #include "types.h"
+#include "OS.h"
 
 typedef enum
 {
@@ -26,11 +27,9 @@ typedef enum
 
 typedef struct
 {
-  uint32_t moduleClk;				/*!< The module clock rate in Hz. */
-  void (*dataReadyCallbackFunction)(void*);	/*!< The user's data ready callback function. */
-  void* dataReadyCallbackArguments;		/*!< The user's data ready callback function arguments. */
-  void (*readCompleteCallbackFunction)(void*);	/*!< The user's read complete callback function. */
-  void* readCompleteCallbackArguments;		/*!< The user's read complete callback function arguments. */
+  uint32_t moduleClk;	/*!< The module clock rate in Hz. */
+  ECB* dataReadySemaphore;
+  ECB* readCompleteSemaphore;
 } TAccelSetup;
 
 #pragma pack(push)
@@ -38,10 +37,10 @@ typedef struct
 
 typedef union
 {
-  uint8_t bytes[3];				/*!< The accelerometer data accessed as an array. */
+  uint8_t bytes[3];	/*!< The accelerometer data accessed as an array. */
   struct
   {
-    uint8_t x, y, z;				/*!< The accelerometer data accessed as individual axes. */
+    uint8_t x, y, z;	/*!< The accelerometer data accessed as individual axes. */
   } axes;
 } TAccelData;
 

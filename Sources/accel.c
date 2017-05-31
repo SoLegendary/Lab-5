@@ -29,6 +29,7 @@
 // CPU and PE_types are needed for critical section variables and the defintion of NULL pointer
 #include "CPU.h"
 #include "PE_types.h"
+#include "OS.h"
 
 // Accelerometer registers
 #define ADDRESS_OUT_X_MSB 0x01
@@ -189,9 +190,8 @@ static union
 */
 
 
-
-static void (*DataReadyCallbackFunction)(void*) = 0;
-static void *DataReadyCallbackArguments         = 0;
+// Private global variable for the Accel thread semaphore
+ECB* DataReadySemaphore;
 
 static bool SynchronousMode = false; // private global to track whether we are in polling or interrupt mode
 
@@ -209,10 +209,9 @@ bool Accel_Init(const TAccelSetup* const accelSetup)
   // Initialising I2C which controls the accelerometer
   // Using a TI2CModule struct defined in I2C.h
   TI2CModule aI2CModule;
-  aI2CModule.primarySlaveAddress           = 0x1D; // address 0011101 (see accelerometer manual pg. 17) - requires pin 7 (SA0) to be high logic level
-  aI2CModule.baudRate                      = 100000;
-  aI2CModule.readCompleteCallbackFunction  = accelSetup->readCompleteCallbackFunction;
-  aI2CModule.readCompleteCallbackArguments = accelSetup->readCompleteCallbackArguments;
+  aI2CModule.primarySlaveAddress   = 0x1D; // address 0011101 (see accelerometer manual pg. 17) - requires pin 7 (SA0) to be high logic level
+  aI2CModule.baudRate              = 100000;
+  aI2CModule.readCompleteSemaphore = accelSetup->readCompleteSemaphore;
 
   if(!I2C_Init(&aI2CModule, accelSetup->moduleClk))
     return false;
@@ -235,9 +234,8 @@ bool Accel_Init(const TAccelSetup* const accelSetup)
   I2C_Write(ADDRESS_CTRL_REG1, 0x3B); // writing 00111011
 
 
-  // Saving callback function pointers and arguments
-  DataReadyCallbackFunction  = accelSetup->dataReadyCallbackFunction;
-  DataReadyCallbackArguments = accelSetup->dataReadyCallbackArguments;
+  // Saving semaphore
+  DataReadySemaphore  = accelSetup->dataReadySemaphore
   
   // Setting up NVIC for PORTB see K70 manual pg 97
   // Vector=104, IRQ=88
@@ -270,7 +268,7 @@ void Accel_ReadXYZ(uint8_t data[3])
   else
   {
     I2C_PollRead(ADDRESS_OUT_X_MSB, accelData[0].bytes, 3);
-	// Median filters the last 3 sets of XYZ data - median filtering for IntRead is done in I2CCallback
+    // Median filters the last 3 sets of XYZ data - median filtering for IntRead is done in I2CCallback
     for (uint8_t i = 0; i < 3; i++)
       data[i] = Median_Filter3(accelData[0].bytes[i], accelData[1].bytes[i], accelData[2].bytes[i]);
   }
@@ -287,15 +285,15 @@ void Accel_SetMode(const TAccelMode mode)
 
   switch (mode)
   {
-	  case ACCEL_POLL: // disable data ready interrupts
-	    I2C_Write(ADDRESS_CTRL_REG4, 0x0);
-	    SynchronousMode = false;
-	    break;
+    case ACCEL_POLL: // disable data ready interrupts
+      I2C_Write(ADDRESS_CTRL_REG4, 0x0);
+      SynchronousMode = false;
+      break;
 	
-	  case ACCEL_INT: // enable data ready interrupts
-	    I2C_Write(ADDRESS_CTRL_REG4, 0x1);
-	    SynchronousMode = true;
-	    break;
+    case ACCEL_INT: // enable data ready interrupts
+      I2C_Write(ADDRESS_CTRL_REG4, 0x1);
+      SynchronousMode = true;
+      break;
   }
 
   // Ending standby mode
@@ -311,7 +309,6 @@ void __attribute__ ((interrupt)) AccelDataReady_ISR(void)
   // clear interrupt flag for INT1 (PTB4)
   PORTB_PCR4 &= ~PORT_PCR_ISF_MASK;
 
-  // Callback function
-  if (DataReadyCallbackFunction)
-    (*DataReadyCallbackFunction)(DataReadyCallbackArguments);
+  // Allow AccelThread to run
+  OS_SemaphoreSignal(DataReadySemaphore);
 }

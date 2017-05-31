@@ -18,11 +18,10 @@
  *
  *  Sets up the control register for the RTC and locks it.
  *  Enables the RTC and sets an interrupt every second.
- *  @param userFunction is a pointer to a user callback function.
- *  @param userArguments is a pointer to the user arguments to use with the user callback function.
+ *  @param pointer to a semaphore for signaling in the ISR
  *  @return bool - TRUE if the RTC was successfully initialized.
  */
-bool RTC_Init(void (*userFunction)(void*), void* userArguments);
+bool RTC_Init(ECB* semaphore);
 
 /*! @brief Sets the value of the real time clock.
  *

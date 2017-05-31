@@ -4,29 +4,47 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../Sources/I2C.c \
-../Sources/accel.c \
+../Sources/Events.c \
+../Sources/FIFO.c \
+../Sources/FTM.c \
+../Sources/Flash.c \
+../Sources/LEDs.c \
+../Sources/PIT.c \
+../Sources/RTC.c \
+../Sources/UART.c \
 ../Sources/main.c \
-../Sources/median.c 
+../Sources/packet.c 
 
 OBJS += \
-./Sources/I2C.o \
-./Sources/accel.o \
+./Sources/Events.o \
+./Sources/FIFO.o \
+./Sources/FTM.o \
+./Sources/Flash.o \
+./Sources/LEDs.o \
+./Sources/PIT.o \
+./Sources/RTC.o \
+./Sources/UART.o \
 ./Sources/main.o \
-./Sources/median.o 
+./Sources/packet.o 
 
 C_DEPS += \
-./Sources/I2C.d \
-./Sources/accel.d \
+./Sources/Events.d \
+./Sources/FIFO.d \
+./Sources/FTM.d \
+./Sources/Flash.d \
+./Sources/LEDs.d \
+./Sources/PIT.d \
+./Sources/RTC.d \
+./Sources/UART.d \
 ./Sources/main.d \
-./Sources/median.d 
+./Sources/packet.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
 Sources/%.o: ../Sources/%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: Cross ARM C Compiler'
-	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -O0 -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections  -g3 -I"C:\Users\11988401\Desktop\Lab-4-Workspace\Lab-4-assess\Library" -I"C:/Users/11988401/Desktop/Lab-4-Workspace/Lab-4-assess/Static_Code/IO_Map" -I"C:/Users/11988401/Desktop/Lab-4-Workspace/Lab-4-assess/Sources" -I"C:/Users/11988401/Desktop/Lab-4-Workspace/Lab-4-assess/Generated_Code" -std=c99 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -c -o "$@" "$<"
+	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -O0 -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections  -g3 -I"/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Static_Code/IO_Map" -I"/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Sources" -I"/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Generated_Code" -I"/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Static_Code/PDD" -std=c99 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -c -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

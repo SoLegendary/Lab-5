@@ -46,19 +46,19 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: Lab4.elf secondary-outputs
+all: Lab3.elf secondary-outputs
 
 # Tool invocations
-Lab4.elf: $(OBJS) $(USER_OBJS)
+Lab3.elf: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cross ARM C++ Linker'
-	arm-none-eabi-g++ -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -O0 -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections  -g3 -T "C:/Users/11988401/Desktop/Lab-4-Workspace/Lab-4-assess/Project_Settings/Linker_Files/ProcessorExpert.ld" -Xlinker --gc-sections -L"C:\Users\11988401\Desktop\Lab-4-Workspace\Lab-4-assess\Library" -Wl,-Map,"Lab4.map" -specs=nano.specs -specs=nosys.specs -o "Lab4.elf" $(OBJS) $(USER_OBJS) $(LIBS)
+	arm-none-eabi-g++ -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -O0 -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections  -g3 -T "/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Project_Settings/Linker_Files/ProcessorExpert.ld" -Xlinker --gc-sections -L"/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Project_Settings/Linker_Files" -Wl,-Map,"Lab3.map" -specs=nano.specs -specs=nosys.specs -o "Lab3.elf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(C++_DEPS)$(OBJS)$(C_DEPS)$(ASM_DEPS)$(CC_DEPS)$(CPP_DEPS)$(CXX_DEPS)$(C_UPPER_DEPS)$(S_UPPER_DEPS) Lab4.elf
+	-$(RM) $(C++_DEPS)$(OBJS)$(C_DEPS)$(ASM_DEPS)$(CC_DEPS)$(CPP_DEPS)$(CXX_DEPS)$(C_UPPER_DEPS)$(S_UPPER_DEPS) Lab3.elf
 	-@echo ' '
 
 secondary-outputs:

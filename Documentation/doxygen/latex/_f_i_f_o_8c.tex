@@ -1,0 +1,23 @@
+\hypertarget{_f_i_f_o_8c}{}\section{Lab-\/3/\+Sources/\+F\+I\+FO.c File Reference}
+\label{_f_i_f_o_8c}\index{Lab-\/3/\+Sources/\+F\+I\+F\+O.\+c@{Lab-\/3/\+Sources/\+F\+I\+F\+O.\+c}}
+
+
+Contains functions for initializing and manipulating data in F\+I\+FO arrays Initializes a F\+I\+FO by resetting values to 0 and also allows for the input and output of data to the U\+A\+RT module using a 256 bit shifting array.  
+
+
+{\ttfamily \#include \char`\"{}F\+I\+F\+O.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}Cpu.\+h\char`\"{}}\newline
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{group__main__module_gad9207f49ab9ed061b6dca6063112ca60}{F\+I\+F\+O\+\_\+\+Init} (\hyperlink{struct_t_f_i_f_o}{T\+F\+I\+FO} $\ast$const F\+I\+FO)
+\begin{DoxyCompactList}\small\item\em Initialize the F\+I\+FO before first use. \end{DoxyCompactList}\item 
+bool \hyperlink{group__main__module_gace64ba4e6bd943f990a294693156cc3b}{F\+I\+F\+O\+\_\+\+Put} (\hyperlink{struct_t_f_i_f_o}{T\+F\+I\+FO} $\ast$const F\+I\+FO, const uint8\+\_\+t data)
+\begin{DoxyCompactList}\small\item\em Put one character into the F\+I\+FO. \end{DoxyCompactList}\item 
+bool \hyperlink{group__main__module_ga6407e3daf24a826a7f17d3e48865e89a}{F\+I\+F\+O\+\_\+\+Get} (\hyperlink{struct_t_f_i_f_o}{T\+F\+I\+FO} $\ast$const F\+I\+FO, uint8\+\_\+t $\ast$const data\+Ptr)
+\begin{DoxyCompactList}\small\item\em Get one character from the F\+I\+FO. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Contains functions for initializing and manipulating data in F\+I\+FO arrays Initializes a F\+I\+FO by resetting values to 0 and also allows for the input and output of data to the U\+A\+RT module using a 256 bit shifting array. 
+

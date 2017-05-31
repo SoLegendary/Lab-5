@@ -13,6 +13,7 @@
 
 // new types
 #include "types.h"
+#include "OS.h"
 
 // Number of bytes in a FIFO
 #define FIFO_SIZE 256
@@ -24,7 +25,8 @@ typedef struct
 {
   uint16_t Start;		/*!< The index of the position of the oldest data in the FIFO */
   uint16_t End; 		/*!< The index of the next available empty position in the FIFO */
-  uint16_t volatile NbBytes;	/*!< The number of bytes currently stored in the FIFO */
+  ECB* volatile UsedBytes;	/*!< The number of bytes currently stored in the FIFO in semaphore format */
+  ECB* volatile FreeBytes;	/*!< The number of space available in the FIFO in semaphore format */
   uint8_t Buffer[FIFO_SIZE];	/*!< The actual array of bytes to store the data */
 } TFIFO;
 
@@ -39,7 +41,6 @@ void FIFO_Init(TFIFO* const FIFO);
  *
  *  @param FIFO A pointer to a FIFO struct where data is to be stored.
  *  @param data A byte of data to store in the FIFO buffer.
- *  @return bool - TRUE if data is successfully stored in the FIFO.
  *  @note Assumes that FIFO_Init has been called.
  */
 bool FIFO_Put(TFIFO* const FIFO, const uint8_t data);
@@ -48,7 +49,6 @@ bool FIFO_Put(TFIFO* const FIFO, const uint8_t data);
  *
  *  @param FIFO A pointer to a FIFO struct with data to be retrieved.
  *  @param dataPtr A pointer to a memory location to place the retrieved byte.
- *  @return bool - TRUE if data is successfully retrieved from the FIFO.
  *  @note Assumes that FIFO_Init has been called.
  */
 bool FIFO_Get(TFIFO* const FIFO, uint8_t* const dataPtr);

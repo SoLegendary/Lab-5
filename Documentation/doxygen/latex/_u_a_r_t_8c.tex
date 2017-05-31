@@ -1,0 +1,28 @@
+\hypertarget{_u_a_r_t_8c}{}\section{Lab-\/3/\+Sources/\+U\+A\+RT.c File Reference}
+\label{_u_a_r_t_8c}\index{Lab-\/3/\+Sources/\+U\+A\+R\+T.\+c@{Lab-\/3/\+Sources/\+U\+A\+R\+T.\+c}}
+
+
+Contains functions for using the K70 Tower U\+A\+RT (Universal Asynchronous Receiver Transmitter) Initializes the U\+A\+RT via register and baud rate settings as well as polling and manipulating the Transfer and Receive F\+I\+F\+Os to send and receive data from the PC.  
+
+
+{\ttfamily \#include \char`\"{}U\+A\+R\+T.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}F\+I\+F\+O.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}M\+K70\+F12.\+h\char`\"{}}\newline
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{group__main__module_gae5760d1a086ec79a33901db253000af9}{U\+A\+R\+T\+\_\+\+Init} (const uint32\+\_\+t baud\+Rate, const uint32\+\_\+t module\+Clk)
+\begin{DoxyCompactList}\small\item\em Sets up the U\+A\+RT interface before first use. \end{DoxyCompactList}\item 
+bool \hyperlink{group__main__module_ga03049bcc3bf9af2a75ee77016d3b0d60}{U\+A\+R\+T\+\_\+\+In\+Char} (uint8\+\_\+t $\ast$const data\+Ptr)
+\begin{DoxyCompactList}\small\item\em Get a character from the receive F\+I\+FO if it is not empty. \end{DoxyCompactList}\item 
+bool \hyperlink{group__main__module_gab20ebaeefd1f29d31e098ade31189dda}{U\+A\+R\+T\+\_\+\+Out\+Char} (const uint8\+\_\+t data)
+\begin{DoxyCompactList}\small\item\em Put a byte in the transmit F\+I\+FO if it is not full. \end{DoxyCompactList}\item 
+void \hyperlink{group__main__module_ga799b375101827a18f652a3f28ecefcd0}{U\+A\+R\+T\+\_\+\+Poll} (void)
+\begin{DoxyCompactList}\small\item\em Poll the U\+A\+RT status register to try and receive and/or transmit one character. \end{DoxyCompactList}\item 
+void \hyperlink{group__main__module_ga445500277ba0e363873b34cffc015745}{\+\_\+\+\_\+attribute\+\_\+\+\_\+} ((interrupt))
+\begin{DoxyCompactList}\small\item\em Interrupt service routine for the F\+TM. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Contains functions for using the K70 Tower U\+A\+RT (Universal Asynchronous Receiver Transmitter) Initializes the U\+A\+RT via register and baud rate settings as well as polling and manipulating the Transfer and Receive F\+I\+F\+Os to send and receive data from the PC. 
+

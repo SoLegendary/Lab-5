@@ -15,7 +15,10 @@
 
 #include "FIFO.h"
 #include "Cpu.h"
+#include "OS.h"
 
+// Binary semaphore ensuring only one thread accesses the semaphore at a time
+static ECB* FIFOAccess = OS_SemaphoreCreate(1);
 
 
 /*!
@@ -23,67 +26,58 @@
  */
 void FIFO_Init(TFIFO * const FIFO)
 {
-  FIFO->Start   = 0;
-  FIFO->End     = 0;
-  FIFO->NbBytes = 0;
+  FIFO->Start     = 0;
+  FIFO->End       = 0;
+  FIFO->UsedBytes = OS_SemaphoreCreate(0);
+  FIFO->FreeBytes = OS_SemaphoreCreate(FIFO_SIZE);
 }
 
 
 
-/*!
- * Checks if the Buffer has room and then puts data into the buffer, returning true.
- * If the buffer is full it loops back around to the start of the buffer and returns false.
- */
 bool FIFO_Put(TFIFO * const FIFO, const uint8_t data)
 {
   // If the FIFO has room, it places some data in to it and returns true.
-  if (FIFO->NbBytes < FIFO_SIZE)
-  {
-    EnterCritical(); // Nesting-compatible Interrupt Disable
+  OS_SemaphoreWait(FIFOAccess); // wait to get exclusive access
 
-    FIFO->Buffer[FIFO->End] = data;
-    FIFO->NbBytes++;
-    FIFO->End++;
+  // Increments the number of bytes
+  OS_SemaphoreWait(FIFO->FreeBytes);
+  OS_SemaphoreSignal(FIFO->UsedBytes);
 
-    if (FIFO->End >= FIFO_SIZE) // If the FIFO is full, it loops back around
-      FIFO->End = 0;
+  // Put data in and increment end index
+  FIFO->Buffer[FIFO->End] = data;
+  FIFO->End++;
 
-    ExitCritical(); // Nesting-compatible Interrupt Enable
-    return true;
-  }
+  if (FIFO->End >= FIFO_SIZE) // If the FIFO is full, it loops back around
+    FIFO->End = 0;
 
-  return false; // Returns false if the FIFO is full
+  // Relinquish exclusive access
+  OS_SemaphoreSignal(FIFOAccess);
+
+  return true;
 }
 
 
 
-/*!
- * Gets data from the buffer.
- */
 bool FIFO_Get(TFIFO * const FIFO, uint8_t * const dataPtr)
 {
-  // Checks to see if FIFO has something in it
-  if (FIFO->NbBytes > 0)
-  {
-    EnterCritical();
+  OS_SemaphoreWait(FIFOAccess); // wait to get exclusive access
 
-    // Gets the oldest data from the FIFO
-    *dataPtr = FIFO->Buffer[FIFO->Start];
-    // Decrements the number of bytes
-    FIFO->NbBytes--;
-    // Increments the start to move to the next available position for oldest data
-    FIFO->Start++;
+  // Decrements the number of bytes
+  OS_SemaphoreWait(FIFO->UsedBytes);
+  OS_SemaphoreSignal(FIFO->FreeBytes);
 
-    // If the FIFO is now full, resets the start position
-    if (FIFO->Start >= FIFO_SIZE)
-      FIFO->Start = 0;
+  // Take data out and increment start index
+  *dataPtr = FIFO->Buffer[FIFO->Start];
+  FIFO->Start++;
 
-    // Returns true if the get process was able to retrieve data
-    ExitCritical();
-    return true;
-  }
-  // Returns false if the FIFO was empty and no data was retrieved
-  return false;
+  // If the FIFO is now full, resets the start position
+  if (FIFO->Start >= FIFO_SIZE)
+    FIFO->Start = 0;
+
+  // Relinquish exclusive access
+  OS_SemaphoreSignal(FIFOAccess);
+
+  return true;
 }
 
 

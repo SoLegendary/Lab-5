@@ -17,8 +17,50 @@
 #include "FIFO.h"
 #include "MK70F12.h"
 #include "Cpu.h"
+#include "OS.h"
+
+#define THREAD_STACK_SIZE 1024
 
 static TFIFO TxFIFO, RxFIFO; // Transfer & Receiver FIFO declaration
+
+// Stacks for FIFO threads
+OS_THREAD_STACK(FIFOPutThreadStack, THREAD_STACK_SIZE);
+OS_THREAD_STACK(FIFOGetThreadStack, THREAD_STACK_SIZE);
+
+// Semaphores for FIFO threads
+static ECB* FIFOPutSemaphore = OS_SemaphoreCreate(0);
+static ECB* FIFOGetSemaphore = OS_SemaphoreCreate(0);
+
+// Semaphore for signaling by FIFO threads - allowing main to know when to check for a packet available
+static ECB* UARTSemaphore;
+
+
+
+/*! @brief Thread to put data into the FIFO
+ */
+static void FIFOPutThread(void* pData)
+{
+  for (;;)
+  {
+    OS_SemaphoreWait(FIFOPutSemaphore);
+    FIFO_Put(&RxFIFO, UART2_D); // Put a character into the receive FIFO
+
+    // Signal PacketThread in main to continue building the packet
+    OS_SemaphoreSignal(UARTSemaphore);
+  }
+}
+
+
+/*! @brief Thread to take data out of the FIFO
+ */
+static void FIFOGetThread(void* pData)
+{
+  for (;;)
+  {
+    OS_SemaphoreWait(FIFOGetSemaphore);
+    FIFO_Get(&TxFIFO, (uint8_t *)&UART2_D); // Get a character from the transfer FIFO
+  }
+}
 
 
 
@@ -26,11 +68,24 @@ static TFIFO TxFIFO, RxFIFO; // Transfer & Receiver FIFO declaration
  * Initializing the UART
  * send parameters: baudRate = 115200, moduleClk = CPU_BUS_CLK_HZ (20,971,520 Hz)
  */
-bool UART_Init(const uint32_t baudRate, const uint32_t moduleClk)
+bool UART_Init(const uint32_t baudRate, const uint32_t moduleClk, ECB* semaphore)
 {
   FIFO_Init(&TxFIFO); //Initialization of Transfer FIFO
   FIFO_Init(&RxFIFO); //Initialization of Receiver FIFO
 
+  OS_ERROR error; // error object for RTOS
+  UARTSemaphore = semaphore;
+
+  // creating FIFO threads
+  error = OS_ThreadCreate(FIFOPutThread,
+          NULL,
+          &FIFOPutThreadStack[THREAD_STACK_SIZE - 1],
+	  2);
+
+  error = OS_ThreadCreate(FIFOGetThread,
+          NULL,
+          &FIFOGetThreadStack[THREAD_STACK_SIZE - 1],
+	  3);
 
   // UART2 Clock Gate - Enabled to turn on the UART2 module.
   SIM_SCGC4 |= SIM_SCGC4_UART2_MASK;
@@ -128,16 +183,13 @@ void __attribute__ ((interrupt)) UART_ISR(void)
   if (UART2_C2 & UART_C2_RIE_MASK) // If the interrupt was due to receiving a character
   {
     if (UART2_S1 & UART_S1_RDRF_MASK) // If PC->Tower data is waiting to be read, put a character into the receive FIFO
-      FIFO_Put(&RxFIFO, UART2_D);
+      OS_SemaphoreSignal(FIFOPutSemaphore);
   }
 
   if (UART2_C2 & UART_C2_TIE_MASK) // If the interrupt was due to transmitting a character
   {
     if (UART2_S1 & UART_S1_TDRE_MASK) // If Tower->PC data is waiting to be read, get a character out of the transfer FIFO
-    {
-      if (!(FIFO_Get(&TxFIFO, (uint8_t *)&UART2_D))) // Attempts to get data from the FIFO
-        UART2_C2 &= ~UART_C2_TIE_MASK; // If there is no data to get, clear the TIE flag to stop the interrupt
-    }
+      OS_SemaphoreSignal(FIFOGetSemaphore);
   }
 }
 

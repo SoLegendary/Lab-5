@@ -14,17 +14,17 @@
 
 #include "RTC.h"
 #include "MK70F12.h"
+#include "OS.h"
 
-// Private global variables for user callback function and its arguments
-static void (*RTCCallback)(void*) = 0;
-static void *RTCCallbackArg       = 0;
+// Private global variable for the RTC thread semaphore
+static ECB* RTCSemaphore;
 
 
 
-bool RTC_Init(void (*userFunction)(void*), void* userArguments)
+bool RTC_Init(ECB* semaphore)
 {
-  RTCCallback = userFunction;
-  RTCCallbackArg = userArguments;
+  // saving semaphore into global variable
+  RTCSemaphore = semaphore;
 
   // Enabling clock gate for RTC
   SIM_SCGC5 |= SIM_SCGC6_RTC_MASK;
@@ -104,9 +104,8 @@ void __attribute__ ((interrupt)) RTC_ISR(void)
   // Every second an interrupt should happen when the clock increments by 1 second
   // According to the TSIE register bit, there is no corresponding flag to clear
 
-  // Check if the callback function pointer is not NULL, then call it
-  if (RTCCallback)
-    (*RTCCallback)(RTCCallbackArg);
+  // Allow RTCThread to run
+  OS_SemaphoreSignal(RTCSemaphore);
 }
 
 

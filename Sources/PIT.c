@@ -14,17 +14,17 @@
 
 #include "PIT.h"
 #include "MK70F12.h"
+#include "OS.h"
 
-// Private global variables for user callback function and its arguments
-static void (*PITCallback)(void*) = 0;
-static void *PITCallbackArg       = 0;
+// Private global variable for the PIT thread semaphore
+static ECB* PITSemaphore;
 
 
 
-bool PIT_Init(const uint32_t moduleClk, void (*userFunction)(void*), void* userArguments)
+bool PIT_Init(const uint32_t moduleClk, ECB* semaphore)
 {
-  PITCallback    = userFunction;
-  PITCallbackArg = userArguments;
+  // saving semaphore for use in the ISR
+  PITSemaphore = semaphore;
 
   // Enabling clock gate for PIT
   SIM_SCGC6 |= SIM_SCGC6_PIT_MASK;
@@ -90,12 +90,15 @@ void PIT_Enable(const bool enable)
 
 void __attribute__ ((interrupt)) PIT_ISR(void)
 {
+  OS_ISREnter();
+	
   // Clear the interrupt flag
   PIT_TFLG0 |= PIT_TFLG_TIF_MASK;
 
-  // Check if the call back function pointer is not NULL, then call it
-  if (PITCallback)
-    (*PITCallback)(PITCallbackArg);
+  // Signal the semaphore, allowing PITThread to run
+  OS_SemaphoreSignal(PITSemaphore);
+  
+  OS_ISRExit();
 }
 
 

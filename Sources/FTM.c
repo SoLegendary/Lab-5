@@ -15,12 +15,10 @@
 
 #include "FTM.h"
 #include "MK70F12.h"
+#include "OS.h"
 
-
-// Private global variables for user callback function and its arguments
-// May need to be an array of function pointers (for 8 channels total)
-static void (*FTM0Callback[8])(void*) = {0};
-static void *FTM0CallbackArg[8]       = {0};
+// Private global variable for the FTM thread semaphore for every channel
+static ECB* FTMSemaphore[8];
 
 
 
@@ -56,9 +54,8 @@ bool FTM_Set(const TFTMChannel* const aFTMChannel)
   // Channel Interrupt Enable
   FTM0_CnSC(channelNb) |= FTM_CnSC_CHIE_MASK;
   
-  // Saving callback function for this channel
-  FTM0Callback[channelNb]    = aFTMChannel->userFunction;
-  FTM0CallbackArg[channelNb] = aFTMChannel->userArguments;
+  // Saving semaphore for this channel
+  FTMSemaphore[channelNb]    = aFTMChannel->semaphore;
   
   // If channel function is for input capture
   if (aFTMChannel->timerFunction == TIMER_FUNCTION_INPUT_CAPTURE)
@@ -148,6 +145,8 @@ bool FTM_StartTimer(const TFTMChannel* const aFTMChannel)
 
 void __attribute__ ((interrupt)) FTM0_ISR(void)
 {
+  OS_ISREnter();
+	
   // Checks for the interrupt source from each channel - probably only need 1 channel for lab 3 anyway
   for (uint8_t channelNb = 0; channelNb < 8; channelNb++)
   {
@@ -155,11 +154,12 @@ void __attribute__ ((interrupt)) FTM0_ISR(void)
     FTM0_CnSC(channelNb) &= ~FTM_CnSC_CHF_MASK;
   
     // If channel is set up for output compare (ie. MSnB:MSnA == 01)
-    // and callback function pointer is not NULL
     if (!(FTM0_CnSC(channelNb) & FTM_CnSC_MSB_MASK) &&
-         (FTM0_CnSC(channelNb) & FTM_CnSC_MSA_MASK) && FTM0Callback)
-      (*FTM0Callback[channelNb])(FTM0CallbackArg[channelNb]);
+         (FTM0_CnSC(channelNb) & FTM_CnSC_MSA_MASK))
+      OS_SemaphoreSignal(FTMSemaphore[channelNb]);
   }
+  
+  OS_ISRExit();
 }
 
 

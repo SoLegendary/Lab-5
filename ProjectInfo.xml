@@ -35,106 +35,55 @@
     <FLASHsize>1M</FLASHsize>
   </PROCESSOR>
   <PATHS>
-    <LinkerCommandFile>C:\Users\Peter\workspace.kds\Lab4\Project_Settings\Linker_Files\ProcessorExpert.ld</LinkerCommandFile>
+    <LinkerCommandFile>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Project_Settings/Linker_Files/ProcessorExpert.ld</LinkerCommandFile>
     <IncludePaths>
-      <Path>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\</Path>
-      <Path>C:\Users\Peter\workspace.kds\Lab4\Static_Code\IO_Map\</Path>
-      <Path>C:\Users\Peter\workspace.kds\Lab4\Sources\</Path>
-      <Path>C:\Users\Peter\workspace.kds\Lab4\Generated_Code\</Path>
+      <Path>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Static_Code/PDD/</Path>
+      <Path>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Static_Code/IO_Map/</Path>
+      <Path>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Sources/</Path>
+      <Path>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Generated_Code/</Path>
     </IncludePaths>
     <SourceCodePaths>
-      <Path>C:\Users\Peter\workspace.kds\Lab4\Generated_Code\</Path>
-      <Path>C:\Users\Peter\workspace.kds\Lab4\Project_Settings\Startup_Code\</Path>
-      <Path>C:\Users\Peter\workspace.kds\Lab4\Sources\</Path>
+      <Path>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Generated_Code/</Path>
+      <Path>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Project_Settings/Startup_Code/</Path>
+      <Path>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Sources/</Path>
     </SourceCodePaths>
   </PATHS>
   <FILES>
     <GeneratedCs>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Generated_Code\CI2C1.c</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Generated_Code\Cpu.c</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Generated_Code\PE_LDD.c</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Generated_Code\RTC1.c</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Generated_Code\TO1.c</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Generated_Code\TU1.c</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Generated_Code\Vectors.c</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Project_Settings\Startup_Code\startup.c</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Sources\Events.c</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Sources\FIFO.c</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Sources\Flash.c</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Sources\LEDs.c</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Sources\LPTMR.c</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Sources\PIT.c</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Sources\RTC.c</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Sources\SPI.c</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Sources\UART.c</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Sources\analog.c</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Sources\main.c</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Sources\packet.c</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Sources\timer.c</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Generated_Code/Cpu.c</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Generated_Code/PE_LDD.c</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Generated_Code/Vectors.c</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Project_Settings/Startup_Code/startup.c</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Sources/Events.c</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Sources/FIFO.c</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Sources/FTM.c</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Sources/Flash.c</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Sources/LEDs.c</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Sources/PIT.c</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Sources/RTC.c</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Sources/UART.c</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Sources/main.c</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Sources/packet.c</PathName>
     </GeneratedCs>
     <GeneratedHs>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Generated_Code\CI2C1.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Generated_Code\Cpu.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Generated_Code\IO_Map.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Generated_Code\PE_Const.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Generated_Code\PE_Error.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Generated_Code\PE_LDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Generated_Code\PE_Types.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Generated_Code\RTC1.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Generated_Code\TO1.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Generated_Code\TU1.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Sources\Events.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Sources\FIFO.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Sources\Flash.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Sources\LEDs.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Sources\LPTMR.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Sources\PIT.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Sources\RTC.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Sources\SPI.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Sources\UART.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Sources\analog.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Sources\packet.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Sources\timer.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Sources\types.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\IO_Map\MK70F12.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\ADC_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\CAN_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\CMP_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\CMT_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\CRC_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\DAC_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\DMAMUX_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\DMA_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\ENET_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\EWM_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\FMC_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\FTFE_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\FTM_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\GPIO_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\I2C_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\LCDC_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\LPTMR_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\MCG_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\MCM_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\NFC_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\OSC_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\PDB_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\PDD_Types.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\PIT_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\PORT_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\RNGA_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\RTC_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\SAI_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\SDHC_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\SIM_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\SPI_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\SysTick_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\UART_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\USBDCD_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\USBHS_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\USB_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\VREF_PDD.h</PathName>
-      <PathName>C:\Users\Peter\workspace.kds\Lab4\Static_Code\PDD\WDOG_PDD.h</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Generated_Code/Cpu.h</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Generated_Code/IO_Map.h</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Generated_Code/PE_Const.h</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Generated_Code/PE_Error.h</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Generated_Code/PE_LDD.h</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Generated_Code/PE_Types.h</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Sources/Events.h</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Sources/FIFO.h</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Sources/FTM.h</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Sources/Flash.h</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Sources/LEDs.h</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Sources/PIT.h</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Sources/RTC.h</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Sources/UART.h</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Sources/packet.h</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Sources/types.h</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Static_Code/IO_Map/MK70F12.h</PathName>
+      <PathName>/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Static_Code/PDD/PDD_Types.h</PathName>
     </GeneratedHs>
   </FILES>
   <OPTIONS>

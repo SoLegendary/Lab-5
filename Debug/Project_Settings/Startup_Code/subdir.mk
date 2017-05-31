@@ -17,7 +17,7 @@ C_DEPS += \
 Project_Settings/Startup_Code/%.o: ../Project_Settings/Startup_Code/%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: Cross ARM C Compiler'
-	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -O0 -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections  -g3 -I"C:\Users\11988401\Desktop\Lab-4-Workspace\Lab-4-assess\Library" -I"C:/Users/11988401/Desktop/Lab-4-Workspace/Lab-4-assess/Static_Code/IO_Map" -I"C:/Users/11988401/Desktop/Lab-4-Workspace/Lab-4-assess/Sources" -I"C:/Users/11988401/Desktop/Lab-4-Workspace/Lab-4-assess/Generated_Code" -std=c99 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -c -o "$@" "$<"
+	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -O0 -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections  -g3 -I"/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Static_Code/IO_Map" -I"/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Sources" -I"/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Generated_Code" -I"/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Static_Code/PDD" -std=c99 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -c -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

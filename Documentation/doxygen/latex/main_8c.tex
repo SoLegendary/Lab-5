@@ -1,0 +1,75 @@
+\hypertarget{main_8c}{}\section{Lab-\/3/\+Sources/main.c File Reference}
+\label{main_8c}\index{Lab-\/3/\+Sources/main.\+c@{Lab-\/3/\+Sources/main.\+c}}
+
+
+Main module. This module utilises the K70 Tower Device to input and output basic data packets in accordance to a Communication Protocol as described on U\+T\+S\+Online. It is to be used in conjunction with Tower\+P\+C.\+exe which sends and receives these packets to and from the Tower via a Windows PC.  
+
+
+{\ttfamily \#include \char`\"{}Cpu.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}Events.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}packet.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}U\+A\+R\+T.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}Flash.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}L\+E\+Ds.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}R\+T\+C.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}P\+I\+T.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}F\+T\+M.\+h\char`\"{}}\newline
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries C\+M\+D\+\_\+\+S\+T\+A\+R\+T\+UP}~0x04
+\item 
+\#define {\bfseries C\+M\+D\+\_\+\+V\+E\+R\+S\+I\+ON}~0x09
+\item 
+\#define {\bfseries C\+M\+D\+\_\+\+N\+U\+M\+B\+ER}~0x0B
+\item 
+\#define {\bfseries C\+M\+D\+\_\+\+T\+O\+W\+E\+R\+M\+O\+DE}~0x0D
+\item 
+\#define {\bfseries C\+M\+D\+\_\+\+P\+R\+O\+G\+B\+Y\+TE}~0x07
+\item 
+\#define {\bfseries C\+M\+D\+\_\+\+R\+E\+A\+D\+B\+Y\+TE}~0x08
+\item 
+\#define {\bfseries C\+M\+D\+\_\+\+S\+E\+T\+T\+I\+ME}~0x0C
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{group__main__module_gaa028adfe8bbcabdb7897a1898874e141}{Handle\+Startup\+Packet} (void)
+\begin{DoxyCompactList}\small\item\em The startup packet will send four packets back to the PC by default It will send the startup, version, tower number and mode packets. If flash is reset, tower number and mode will be set to student\+Number and default\+Tower\+Mode. \end{DoxyCompactList}\item 
+bool \hyperlink{group__main__module_ga84fe5ea768aedc0d1e4e2818ff8bd406}{Handle\+Version\+Packet} (void)
+\begin{DoxyCompactList}\small\item\em Handles the tower version packet in accordance with the Tower Serial Communication Protocol document. \end{DoxyCompactList}\item 
+bool \hyperlink{group__main__module_gac86820f24fb68dfbb9d2a3b772af94b9}{Handle\+Number\+Packet} (void)
+\begin{DoxyCompactList}\small\item\em Handles the tower number packet in accordance with the Tower Serial Communication Protocol document. \end{DoxyCompactList}\item 
+bool \hyperlink{group__main__module_gae491978a09b1e90673364b69746bcae1}{Handle\+Tower\+Mode\+Packet} (void)
+\begin{DoxyCompactList}\small\item\em Handles the tower mode packet in accordance with the Tower Serial Communication Protocol document. \end{DoxyCompactList}\item 
+bool \hyperlink{group__main__module_ga87fcb3feeebe2013c2376a2635080be5}{Handle\+Prog\+Byte\+Packet} (void)
+\begin{DoxyCompactList}\small\item\em Handles a Flash Program Byte packet as per the Tower Serial Communication Protocol document by writing the data in parameter3 to the address given in parameter1. \end{DoxyCompactList}\item 
+bool \hyperlink{group__main__module_ga229934574bc13961e301d7c8ea4742cc}{Handle\+Read\+Byte\+Packet} (void)
+\begin{DoxyCompactList}\small\item\em Handles a Flash Read Byte packet as per the Tower Serial Communication Protocol document by putting in a packet with the address of the flash byte read and the data contained in that address. \end{DoxyCompactList}\item 
+bool \hyperlink{group__main__module_ga5e7670b320e43d8d708a92bbe0746eff}{Handle\+Set\+Time\+Packet} (void)
+\begin{DoxyCompactList}\small\item\em Handles a Set Time packet as per the Tower Serial Communication Protocol document by setting sending the parameters of the packet to the R\+TC module to be set. \end{DoxyCompactList}\item 
+void \hyperlink{group__main__module_gab7a5cb735555819b24719d6078028181}{Handle\+Packet} (void)
+\begin{DoxyCompactList}\small\item\em Handles the packet by first checking to see what type of packet it is and processing it as per the Tower Serial Communication Protocol document. \end{DoxyCompactList}\item 
+void \hyperlink{group__main__module_ga83e32d3437f8fdbf06974d23242a9462}{P\+I\+T\+Callback} (void $\ast$arg)
+\begin{DoxyCompactList}\small\item\em User callback function for use as a P\+I\+T\+\_\+\+Init parameter Every 500ms P\+I\+T\+\_\+\+I\+SR is triggered and toggles Green L\+ED. \end{DoxyCompactList}\item 
+void \hyperlink{group__main__module_ga2dabe81b72bf8ec8155cd875975beb07}{R\+T\+C\+Callback} (void $\ast$arg)
+\begin{DoxyCompactList}\small\item\em User callback function for use as an R\+T\+C\+\_\+\+Init parameter Every 1s the R\+TC interrupt occurs to send back clock time to the PC and toggles Yellow L\+ED. \end{DoxyCompactList}\item 
+void \hyperlink{group__main__module_gad1796ae9fd33efded3fd853ba9e56d71}{F\+T\+M0\+Callback} (void $\ast$arg)
+\begin{DoxyCompactList}\small\item\em User callback function for use as an F\+T\+M\+\_\+\+Set parameter After a 1s delay set by \hyperlink{packet_8c}{Packet.\+c} receiving a valid packet and turning on Blue L\+ED, this turns it off. \end{DoxyCompactList}\item 
+int {\bfseries main} (void)
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+volatile \hyperlink{unionuint16union__t}{uint16union\+\_\+t} $\ast$ {\bfseries tower\+Number} = N\+U\+LL
+\item 
+volatile \hyperlink{unionuint16union__t}{uint16union\+\_\+t} $\ast$ {\bfseries tower\+Mode} = N\+U\+LL
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Main module. This module utilises the K70 Tower Device to input and output basic data packets in accordance to a Communication Protocol as described on U\+T\+S\+Online. It is to be used in conjunction with Tower\+P\+C.\+exe which sends and receives these packets to and from the Tower via a Windows PC. 
+
+\begin{DoxyVersion}{Version}
+1.\+0 
+\end{DoxyVersion}

@@ -70,7 +70,7 @@ extern const uint8_t PACKET_ACK_MASK;
  *  @param moduleClk The module clock rate in Hz.
  *  @return bool - TRUE if the packet module was successfully initialized.
  */
-bool Packet_Init(const uint32_t baudRate, const uint32_t moduleClk);
+bool Packet_Init(const uint32_t baudRate, const uint32_t moduleClk, ECB* semaphore);
 
 /*! @brief Attempts to get a packet from the received data.
  *

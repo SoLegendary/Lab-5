@@ -17,6 +17,7 @@
 #include "UART.h"
 #include "FTM.h"
 #include "LEDs.h"
+#include "OS.h"
 
 
 TPacket Packet; // Declaration of new packet structure as of lab 2
@@ -24,12 +25,13 @@ const uint8_t PACKET_ACK_MASK = 0x80; // Acknowledgment Bit Mask in Hex
 
 
 
-bool Packet_Init(const uint32_t baudRate, const uint32_t moduleClk)
+bool Packet_Init(const uint32_t baudRate, const uint32_t moduleClk, ECB* semaphore)
 {
-  return UART_Init(baudRate, moduleClk); // Simply send parameters along to UART_Init
+  return UART_Init(baudRate, moduleClk, semaphore); // Simply send parameters along to UART_Init
 }
 
 
+// Might not be able to use a while loop for lab 5?
 
 bool Packet_Get(void)
 {

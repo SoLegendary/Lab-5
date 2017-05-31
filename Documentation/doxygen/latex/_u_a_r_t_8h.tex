@@ -1,0 +1,34 @@
+\hypertarget{_u_a_r_t_8h}{}\section{Lab-\/3/\+Sources/\+U\+A\+RT.h File Reference}
+\label{_u_a_r_t_8h}\index{Lab-\/3/\+Sources/\+U\+A\+R\+T.\+h@{Lab-\/3/\+Sources/\+U\+A\+R\+T.\+h}}
+
+
+I/O routines for U\+A\+RT communications on the T\+W\+R-\/\+K70\+F120M.  
+
+
+{\ttfamily \#include \char`\"{}types.\+h\char`\"{}}\newline
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{group__main__module_gae5760d1a086ec79a33901db253000af9}{U\+A\+R\+T\+\_\+\+Init} (const uint32\+\_\+t baud\+Rate, const uint32\+\_\+t module\+Clk)
+\begin{DoxyCompactList}\small\item\em Sets up the U\+A\+RT interface before first use. \end{DoxyCompactList}\item 
+bool \hyperlink{group__main__module_ga03049bcc3bf9af2a75ee77016d3b0d60}{U\+A\+R\+T\+\_\+\+In\+Char} (uint8\+\_\+t $\ast$const data\+Ptr)
+\begin{DoxyCompactList}\small\item\em Get a character from the receive F\+I\+FO if it is not empty. \end{DoxyCompactList}\item 
+bool \hyperlink{group__main__module_gab20ebaeefd1f29d31e098ade31189dda}{U\+A\+R\+T\+\_\+\+Out\+Char} (const uint8\+\_\+t data)
+\begin{DoxyCompactList}\small\item\em Put a byte in the transmit F\+I\+FO if it is not full. \end{DoxyCompactList}\item 
+void \hyperlink{group__main__module_ga799b375101827a18f652a3f28ecefcd0}{U\+A\+R\+T\+\_\+\+Poll} (void)
+\begin{DoxyCompactList}\small\item\em Poll the U\+A\+RT status register to try and receive and/or transmit one character. \end{DoxyCompactList}\item 
+void \hyperlink{group__main__module_ga445500277ba0e363873b34cffc015745}{\+\_\+\+\_\+attribute\+\_\+\+\_\+} ((interrupt)) U\+A\+R\+T\+\_\+\+I\+SR(void)
+\begin{DoxyCompactList}\small\item\em Interrupt service routine for the U\+A\+RT. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+I/O routines for U\+A\+RT communications on the T\+W\+R-\/\+K70\+F120M. 
+
+This contains the functions for operating the U\+A\+RT (serial port).
+
+\begin{DoxyAuthor}{Author}
+P\+McL 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+2015-\/07-\/23 
+\end{DoxyDate}

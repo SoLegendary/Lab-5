@@ -44,6 +44,7 @@
 #include "accel.h"
 #include "I2C.h"
 #include "median.h"
+#include "OS.h"
 #include "PE_Types.h"
 #include "PE_Error.h"
 #include "PE_Const.h"
@@ -61,6 +62,7 @@
 #define CMD_MODE      0x0A
 #define CMD_ACCEL     0x10
 
+#define THREAD_STACK_SIZE 1024
 
 
 volatile uint16union_t *towerNumber = NULL; // Currently set tower number and mode
@@ -70,6 +72,24 @@ static TAccelData accelDataOld; // oldest XYZ accelerometer data - only used in 
 static TAccelData accelDataNew; // latest XYZ accelerometer data
 
 static bool synchronousMode = false; // variable to track current I2C mode (synchronous by default)
+
+// RTOS Threads stacks - macro declares a variable with name of the first argument
+OS_THREAD_STACK(InitThreadStack, THREAD_STACK_SIZE);
+OS_THREAD_STACK(RTCThreadStack, THREAD_STACK_SIZE);
+OS_THREAD_STACK(PacketThreadStack, THREAD_STACK_SIZE);
+OS_THREAD_STACK(FTM0ThreadStack, THREAD_STACK_SIZE);
+OS_THREAD_STACK(PITThreadStack, THREAD_STACK_SIZE);
+OS_THREAD_STACK(AccelThreadStack, THREAD_STACK_SIZE);
+OS_THREAD_STACK(I2CThreadStack, THREAD_STACK_SIZE);
+
+
+// RTOS Semaphores - all initialised as 0 (ie. threads can't run before being signaled)
+OS_ECB* RTCSemaphore    = OS_SemaphoreCreate(0);
+OS_ECB* PacketSemaphore = OS_SemaphoreCreate(0);
+OS_ECB* FTM0Semaphore   = OS_SemaphoreCreate(0);
+OS_ECB* PITSemaphore    = OS_SemaphoreCreate(0);
+OS_ECB* AccelSemaphore  = OS_SemaphoreCreate(0);
+OS_ECB* I2CSemaphore    = OS_SemaphoreCreate(0);
 
 
 // Function Initializations
@@ -273,21 +293,20 @@ bool HandleModePacket(void)
   if (Packet_Parameter1 == 0x02) // If the packet is for SET change the mode using Accel_SetMode()
   {
     switch (Packet_Parameter2)
-	  {
-	    case 0:
-	      synchronousMode = false;
-	      Accel_SetMode(ACCEL_POLL);
-		  PIT_Enable(true);
-	      return true;
+    {
+      case 0:
+        synchronousMode = false;
+        Accel_SetMode(ACCEL_POLL);
+	PIT_Enable(true);
+        return true;
       case 1:
-	      synchronousMode = true;
-	      Accel_SetMode(ACCEL_INT);
-		  PIT_Enable(false);
-	      return true;
+        synchronousMode = true;
+        Accel_SetMode(ACCEL_INT);
+        PIT_Enable(false);
+	return true;
       default:
-	      return false;
-	  }
-
+	return false;
+    }
   }
   
   else if (Packet_Parameter1 == 0x01) // If the packet is for GET, just return the current mode
@@ -337,9 +356,9 @@ void HandlePacket(void)
     case CMD_SETTIME:
       success = HandleSetTimePacket();
       break;
-	case CMD_MODE:
-	  success = HandleModePacket();
-	  break;
+    case CMD_MODE:
+      success = HandleModePacket();
+      break;
     default:
       success = false;
       break;
@@ -364,101 +383,22 @@ void HandlePacket(void)
   }
 }
   
-  
-  
-/*************************************/
-/** CALLBACK FUNCTIONS FOR ALL ISRs **/
-/*************************************/
 
-/*! @brief User callback function for use as a PIT_Init parameter
- *  Every period set by PIT_Set, PIT_ISR is triggered and calls this function
+
+
+
+
+/***************************************************************************/
+/** RTOS THREADS FOR ALL MODULES - In order of priority HIGHEST -> LOWEST **/
+/***************************************************************************/
+
+
+/*! @brief Very first thread to run, but runs only once to initialise all tower modules
+ * and then deletes itself at the end; priority = 0 (highest)
  */
-void PITCallback(void* arg)
+static void InitThread(void* pData)
 {
-  // shift new data into old before getting new data
-  accelDataOld.bytes[0] = accelDataNew.bytes[0];
-  accelDataOld.bytes[1] = accelDataNew.bytes[1];
-  accelDataOld.bytes[2] = accelDataNew.bytes[2];
-
-  Accel_ReadXYZ(accelDataNew.bytes);
-
-  // If any axes are new, send the packet and toggle green LED
-  if((accelDataOld.bytes[0] != accelDataNew.bytes[0]) ||
-     (accelDataOld.bytes[1] != accelDataNew.bytes[1]) ||
-     (accelDataOld.bytes[2] != accelDataNew.bytes[2]))
-  {
-    Packet_Put(CMD_ACCEL, accelDataNew.bytes[0], accelDataNew.bytes[1], accelDataNew.bytes[2]);
-    LEDs_Toggle(LED_GREEN);
-  }
-}
-  
-/*! @brief User callback function for use as an RTC_Init parameter
- *  Every second the RTC interrupt occurs to send back clock time to the PC and toggles Yellow LED
- */
-void RTCCallback(void* arg)
-{
-  // Get and send time back to PC, just as in HandleSetTimePacket
-  uint8_t seconds, minutes, hours;
-  RTC_Get(&seconds, &minutes, &hours);
-
-  LEDs_Toggle(LED_YELLOW);
-  Packet_Put(CMD_SETTIME, seconds, minutes, hours);
-}
-
-/*! @brief User callback function for use as an FTM_Set parameter
- *  After a 1s delay set by Packet.c receiving a valid packet and turning on Blue LED, this turns it off
- */
-void FTM0Callback(void* arg)
-{
-  LEDs_Off(LED_BLUE);
-}
-
-/*! @brief User callback function for the accelerometer data reading
- *  After data is ready to be read, call Accel_ReadXYZ and save its data
- */
-void AccelCallback(void* arg)
-{
-  Accel_ReadXYZ(accelDataNew.bytes);
-}
- 
-/*! @brief User callback function for the I2C data complete
- *  After data read from AccelCallback, I2C_ISR is triggered to send the packet to PC and toggle the green LED
- */
-void I2CCallback(void* arg)
-{
-  // This callback copies some code from Accel_ReadXYZ due to order problems with synchronous mode
-	
-  // array of 3 unions and to save data from the 3 most recent Accel_ReadXYZ calls
-  static TAccelData accelData[3] = {{0,0,0},{0,0,0}};
-
-  // shifts data in the array unions back (index 0 is most recent data, 2 is oldest data)
-  for (uint8_t i = 0; i < 3; i++)
-  {
-    accelData[2].bytes[i] = accelData[1].bytes[i];
-    accelData[1].bytes[i] = accelData[0].bytes[i];
-  }
-  
-  // Populate newest array
-  accelData[0].bytes[0] = accelDataNew.bytes[0];
-  accelData[0].bytes[1] = accelDataNew.bytes[1];
-  accelData[0].bytes[2] = accelDataNew.bytes[2];
-
-  // Median filters the last 3 sets of XYZ data
-  for (uint8_t i = 0; i < 3; i++)
-    accelDataNew.bytes[i] = Median_Filter3(accelData[0].bytes[i], accelData[1].bytes[i], accelData[2].bytes[i]);
-  
-  // Send data back to PC
-  Packet_Put(CMD_ACCEL, accelDataNew.bytes[0], accelDataNew.bytes[1], accelDataNew.bytes[2]);
-  LEDs_Toggle(LED_GREEN);
-}
-
-
-
-/*lint -save  -e970 Disable MISRA rule (6.3) checking. */
-int main(void)
-/*lint -restore Enable MISRA rule (6.3) checking. */
-{
-  /* Write your local variable definition here */
+  __DI(); // Disable interrupts
 
   const uint32_t BAUDRATE      = 115200;
   const uint32_t ACCELBAUDRATE = 100000;
@@ -467,16 +407,170 @@ int main(void)
   FTM0Channel0.channelNb           = 0;
   FTM0Channel0.timerFunction       = TIMER_FUNCTION_OUTPUT_COMPARE;
   FTM0Channel0.ioType.outputAction = TIMER_OUTPUT_LOW;
-  FTM0Channel0.userFunction        = FTM0Callback;
-  FTM0Channel0.userArguments       = NULL;
-  
+  FTM0Channel0.semaphore           = FTM0Semaphore;
+
   TAccelSetup accelSetup; // Struct to set up the accelerometer via I2C0
-  accelSetup.moduleClk                     = CPU_BUS_CLK_HZ;
-  accelSetup.dataReadyCallbackFunction     = AccelCallback;
-  accelSetup.dataReadyCallbackArguments    = NULL;
-  accelSetup.readCompleteCallbackFunction  = I2CCallback;
-  accelSetup.readCompleteCallbackArguments = NULL;
-  
+  accelSetup.moduleClk             = CPU_BUS_CLK_HZ;
+  accelSetup.dataReadySemaphore    = AccelSemaphore;
+  accelSetup.readCompleteSemaphore = I2CSemaphore;
+
+  Packet_Init(BAUDRATE, CPU_BUS_CLK_HZ, PacketSemaphore);
+  Flash_Init();
+  LEDs_Init();
+  FTM_Init();
+  FTM_Set(&FTM0Channel0);
+  PIT_Init(CPU_BUS_CLK_HZ, FTM0Semaphore);
+  // RTC_Init(RTCSemaphore);
+  Accel_Init(&accelSetup));
+
+  // Polling mode by default for accelerometer
+  PIT_Set(1000000000, true);
+  PIT_Enable(true);
+  synchronousMode = false;
+  Accel_SetMode(ACCEL_POLL);
+
+  // Startup protocol
+  LEDs_On(LED_ORANGE);
+  HandleStartupPacket();
+
+  __EI(); // Enable interrupts
+
+  OS_ThreadDelete(OS_PRIORITY_SELF);
+}
+
+
+/*! @brief Thread to send the time from the RTC back to the PC
+ *  set as high priority to avoid clock desyncing
+ */
+static void RTCThread(void* pData)
+{
+  for (;;)
+  {
+    // wait for RTC_ISR to signal
+    OS_SemaphoreWait(RTCSemaphore,0);
+
+    // Get and send time back to PC, just as in HandleSetTimePacket
+    uint8_t seconds, minutes, hours;
+    RTC_Get(&seconds, &minutes, &hours);
+
+    LEDs_Toggle(LED_YELLOW);
+    Packet_Put(CMD_SETTIME, seconds, minutes, hours);
+  }
+}
+
+
+/*! @brief Thread to do something once the FTM0 timer expires
+ */
+static void FTM0Thread(void* pData)
+{
+  for (;;)
+  {
+    // wait for FTM0_ISR to signal
+    OS_SemaphoreWait(FTM0Semaphore,0);
+
+    LEDs_Off(LED_BLUE);
+  }
+}
+
+/*! @brief Thread to do something periodically according to the PIT period setting
+ * currently used for Lab 4 polling mode readings (asynchronous mode)
+ */
+static void PITThread(void* pData)
+{
+  for (;;)
+  {
+    // wait for PIT_ISR to signal
+    OS_SemaphoreWait(PITSemaphore,0);
+
+    // shift new data into old before getting new data
+    accelDataOld.bytes[0] = accelDataNew.bytes[0];
+    accelDataOld.bytes[1] = accelDataNew.bytes[1];
+    accelDataOld.bytes[2] = accelDataNew.bytes[2];
+
+    Accel_ReadXYZ(accelDataNew.bytes);
+
+   // If any axes are new, send the packet and toggle green LED
+     if((accelDataOld.bytes[0] != accelDataNew.bytes[0]) ||
+        (accelDataOld.bytes[1] != accelDataNew.bytes[1]) ||
+        (accelDataOld.bytes[2] != accelDataNew.bytes[2]))
+    {
+      Packet_Put(CMD_ACCEL, accelDataNew.bytes[0], accelDataNew.bytes[1], accelDataNew.bytes[2]);
+      LEDs_Toggle(LED_GREEN);
+    }
+  }
+}
+
+/*! @brief Thread to read accelerometer data via Accel_ISR signaling
+ */
+static void AccelThread(void* pData)
+{
+  for (;;)
+  {
+    // wait for FIFO or UART to signal
+    OS_SemaphoreWait(AccelSemaphore,0);
+
+    Accel_ReadXYZ(accelDataNew.bytes);
+  }
+}
+
+
+/*! @brief Thread to median filter and send data back to PC via I2C_ISR signaling
+ */
+static void I2CThread(void* pData)
+{
+  for (;;)
+  {
+    // wait for FIFO or UART to signal
+    OS_SemaphoreWait(I2CSemaphore,0);
+
+    // This thread copies some code from Accel_ReadXYZ due to order problems with synchronous mode
+
+    // array of 3 unions and to save data from the 3 most recent Accel_ReadXYZ calls
+    static TAccelData accelData[3] = {{0,0,0},{0,0,0}};
+
+    // shifts data in the array unions back (index 0 is most recent data, 2 is oldest data)
+    for (uint8_t i = 0; i < 3; i++)
+    {
+      accelData[2].bytes[i] = accelData[1].bytes[i];
+      accelData[1].bytes[i] = accelData[0].bytes[i];
+    }
+
+    // Populate newest array
+    accelData[0].bytes[0] = accelDataNew.bytes[0];
+    accelData[0].bytes[1] = accelDataNew.bytes[1];
+    accelData[0].bytes[2] = accelDataNew.bytes[2];
+
+    // Median filters the last 3 sets of XYZ data
+    for (uint8_t i = 0; i < 3; i++)
+      accelDataNew.bytes[i] = Median_Filter3(accelData[0].bytes[i], accelData[1].bytes[i], accelData[2].bytes[i]);
+
+    // Send data back to PC
+    Packet_Put(CMD_ACCEL, accelDataNew.bytes[0], accelDataNew.bytes[1], accelDataNew.bytes[2]);
+    LEDs_Toggle(LED_GREEN);
+  }
+}
+
+
+/*! @brief Thread to handle packets taken from the FIFO
+ *  does not wait for any semaphore (ie. would run forever), but has lowest priority
+ *  and so can be interrupted by any ISR and be placed on waiting for any other thread
+ */
+static void PacketThread(void* pData)
+{
+  for (;;)
+  {
+    if (Packet_Get()) // If a packet is received.
+      HandlePacket(); // Handle the packet appropriately.
+  }
+}
+
+
+
+/*lint -save  -e970 Disable MISRA rule (6.3) checking. */
+int main(void)
+/*lint -restore Enable MISRA rule (6.3) checking. */
+{
+  OS_ERROR error; // error object for RTOS
   
 
   /*** Processor Expert internal initialization. DON'T REMOVE THIS CODE!!! ***/
@@ -484,41 +578,58 @@ int main(void)
   /*** End of Processor Expert internal initialization.                    ***/
 
 
-  // Write your code here
+  // Initialize the RTOS - without flashing the orange LED "heartbeat"
+  OS_Init(CPU_CORE_CLK_HZ, false);
 
-  __DI(); // Disable interrupts
+
+  /*  Creating all threads; parameters are:
+   *  1. Thread name (address)
+   *  2. Arguments (which are all of type void* pData)
+   *  3. Pointer to thread stack with [STACK_SIZE]
+   *  4. Priority (0 is highest)
+   */
+  error = OS_ThreadCreate(InitThread,
+          NULL,
+          &InitThreadStack[THREAD_STACK_SIZE - 1],
+	  0);
+
+  error = OS_ThreadCreate(RTCThread,
+          NULL,
+          &RTCThreadStack[THREAD_STACK_SIZE - 1],
+	  1);
+
+	  
+  // threads 2 & 3 are inside UART.c
   
-  if (Packet_Init(BAUDRATE, CPU_BUS_CLK_HZ) &&
-      Flash_Init() &&
-      LEDs_Init() &&
-      FTM_Init() &&
-      FTM_Set(&FTM0Channel0) &&
-      PIT_Init(CPU_BUS_CLK_HZ, PITCallback, NULL) && 
-      // RTC_Init(RTCCallback, NULL) &&
-	    Accel_Init(&accelSetup))
-  {
-    PIT_Set(1000000000, true);
-    PIT_Enable(true);
 
-    LEDs_On(LED_ORANGE);
-    HandleStartupPacket();
-	
-    // Polling mode by default for accelerometer
-    synchronousMode = false;
-    Accel_SetMode(ACCEL_POLL);
+  error = OS_ThreadCreate(FTM0Thread,
+          NULL,
+          &FTM0ThreadStack[THREAD_STACK_SIZE - 1],
+	  4);
 
+  error = OS_ThreadCreate(PITThread,
+          NULL,
+          &PITThreadStack[THREAD_STACK_SIZE - 1],
+	  5);
 
+  error = OS_ThreadCreate(AccelThread,
+          NULL,
+          &AccelThreadStack[THREAD_STACK_SIZE - 1],
+	  6);
 
-    __EI(); // Enable interrupts
-
-
-    for (;;)
-    {
-      if (Packet_Get()) // If a packet is received.
-        HandlePacket(); // Handle the packet appropriately.
-      // UART_Poll(); // Continue polling the UART for activity - uncomment for use in Lab 1 or 2
-    }
-  }
+  error = OS_ThreadCreate(I2CThread,
+          NULL,
+          &I2CThreadStack[THREAD_STACK_SIZE - 1],
+	  7);
+	  
+  error = OS_ThreadCreate(PacketThread,
+          NULL,
+          &PacketThreadStack[THREAD_STACK_SIZE - 1],
+	  8);
+	  
+  // Start multithreading - never returns!
+  // NOTE that this still runs threads that are created in lower levels inside modules
+  OS_Start();
 
 
 

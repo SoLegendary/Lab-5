@@ -1,0 +1,81 @@
+\hypertarget{union_t_packet}{}\section{T\+Packet Union Reference}
+\label{union_t_packet}\index{T\+Packet@{T\+Packet}}
+\subsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+uint8\+\_\+t \hyperlink{union_t_packet_af30c0f9cf4e10268f748ff49f9d75e0d}{bytes} \mbox{[}P\+A\+C\+K\+E\+T\+\_\+\+N\+B\+\_\+\+B\+Y\+T\+ES\mbox{]}
+\item 
+\mbox{\Hypertarget{union_t_packet_a9635fa1382d57c98038809d678d14b1f}\label{union_t_packet_a9635fa1382d57c98038809d678d14b1f}} 
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=\kill
+struct \{\\
+\>uint8\_t \hyperlink{union_t_packet_a1a5aaa930940857f68f245eeb89506b5}{command}\\
+\>union \{\\
+\>\>struct \{\\
+\>\>\>uint8\_t \hyperlink{union_t_packet_a885387f90c2e461096a8ee17f6b030bb}{parameter1}\\
+\>\>\>uint8\_t \hyperlink{union_t_packet_a529db744c76c0c8642be06021a73e6cd}{parameter2}\\
+\>\>\>uint8\_t \hyperlink{union_t_packet_a4636d4af3617a80946877b5fe4b1e6fe}{parameter3}\\
+\>\>\} {\bfseries separate}\\
+\>\>struct \{\\
+\>\>\>uint16\_t \hyperlink{union_t_packet_a1a78ed579b8494efcccdb83da56372f4}{parameter12}\\
+\>\>\>uint8\_t {\bfseries parameter3}\\
+\>\>\} {\bfseries combined12}\\
+\>\>struct \{\\
+\>\>\>uint8\_t {\bfseries paramater1}\\
+\>\>\>uint16\_t \hyperlink{union_t_packet_ac3413e5ef4be0640b15c86eb9852b3e2}{parameter23}\\
+\>\>\} {\bfseries combined23}\\
+\>\} {\bfseries parameters}\\
+\>uint8\_t {\bfseries checksum}\\
+\} {\bfseries packetStruct}\\
+
+\end{tabbing}\end{DoxyCompactItemize}
+
+
+\subsection{Field Documentation}
+\mbox{\Hypertarget{union_t_packet_af30c0f9cf4e10268f748ff49f9d75e0d}\label{union_t_packet_af30c0f9cf4e10268f748ff49f9d75e0d}} 
+\index{T\+Packet@{T\+Packet}!bytes@{bytes}}
+\index{bytes@{bytes}!T\+Packet@{T\+Packet}}
+\subsubsection{\texorpdfstring{bytes}{bytes}}
+{\footnotesize\ttfamily uint8\+\_\+t bytes\mbox{[}P\+A\+C\+K\+E\+T\+\_\+\+N\+B\+\_\+\+B\+Y\+T\+ES\mbox{]}}
+
+The packet as an array of bytes. \mbox{\Hypertarget{union_t_packet_a1a5aaa930940857f68f245eeb89506b5}\label{union_t_packet_a1a5aaa930940857f68f245eeb89506b5}} 
+\index{T\+Packet@{T\+Packet}!command@{command}}
+\index{command@{command}!T\+Packet@{T\+Packet}}
+\subsubsection{\texorpdfstring{command}{command}}
+{\footnotesize\ttfamily uint8\+\_\+t command}
+
+The packet\textquotesingle{}s command. \mbox{\Hypertarget{union_t_packet_a885387f90c2e461096a8ee17f6b030bb}\label{union_t_packet_a885387f90c2e461096a8ee17f6b030bb}} 
+\index{T\+Packet@{T\+Packet}!parameter1@{parameter1}}
+\index{parameter1@{parameter1}!T\+Packet@{T\+Packet}}
+\subsubsection{\texorpdfstring{parameter1}{parameter1}}
+{\footnotesize\ttfamily uint8\+\_\+t parameter1}
+
+The packet\textquotesingle{}s 1st parameter. \mbox{\Hypertarget{union_t_packet_a1a78ed579b8494efcccdb83da56372f4}\label{union_t_packet_a1a78ed579b8494efcccdb83da56372f4}} 
+\index{T\+Packet@{T\+Packet}!parameter12@{parameter12}}
+\index{parameter12@{parameter12}!T\+Packet@{T\+Packet}}
+\subsubsection{\texorpdfstring{parameter12}{parameter12}}
+{\footnotesize\ttfamily uint16\+\_\+t parameter12}
+
+Parameter 1 and 2 concatenated. \mbox{\Hypertarget{union_t_packet_a529db744c76c0c8642be06021a73e6cd}\label{union_t_packet_a529db744c76c0c8642be06021a73e6cd}} 
+\index{T\+Packet@{T\+Packet}!parameter2@{parameter2}}
+\index{parameter2@{parameter2}!T\+Packet@{T\+Packet}}
+\subsubsection{\texorpdfstring{parameter2}{parameter2}}
+{\footnotesize\ttfamily uint8\+\_\+t parameter2}
+
+The packet\textquotesingle{}s 2nd parameter. \mbox{\Hypertarget{union_t_packet_ac3413e5ef4be0640b15c86eb9852b3e2}\label{union_t_packet_ac3413e5ef4be0640b15c86eb9852b3e2}} 
+\index{T\+Packet@{T\+Packet}!parameter23@{parameter23}}
+\index{parameter23@{parameter23}!T\+Packet@{T\+Packet}}
+\subsubsection{\texorpdfstring{parameter23}{parameter23}}
+{\footnotesize\ttfamily uint16\+\_\+t parameter23}
+
+Parameter 2 and 3 concatenated. \mbox{\Hypertarget{union_t_packet_a4636d4af3617a80946877b5fe4b1e6fe}\label{union_t_packet_a4636d4af3617a80946877b5fe4b1e6fe}} 
+\index{T\+Packet@{T\+Packet}!parameter3@{parameter3}}
+\index{parameter3@{parameter3}!T\+Packet@{T\+Packet}}
+\subsubsection{\texorpdfstring{parameter3}{parameter3}}
+{\footnotesize\ttfamily uint8\+\_\+t parameter3}
+
+The packet\textquotesingle{}s 3rd parameter. 
+
+The documentation for this union was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+Lab-\/3/\+Sources/\hyperlink{packet_8h}{packet.\+h}\end{DoxyCompactItemize}

@@ -1,0 +1,45 @@
+\hypertarget{dir_fe1750b9a987ca39833cae2033850e56}{}\section{Lab-\/3/\+Sources Directory Reference}
+\label{dir_fe1750b9a987ca39833cae2033850e56}\index{Lab-\/3/\+Sources Directory Reference@{Lab-\/3/\+Sources Directory Reference}}
+\subsection*{Files}
+\begin{DoxyCompactItemize}
+\item 
+file \hyperlink{_events_8c}{Events.\+c}
+\begin{DoxyCompactList}\small\item\em This is user\textquotesingle{}s event module. Put your event handler code here. \end{DoxyCompactList}\item 
+file \hyperlink{_events_8h}{Events.\+h}
+\begin{DoxyCompactList}\small\item\em This is user\textquotesingle{}s event module. Put your event handler code here. \end{DoxyCompactList}\item 
+file \hyperlink{_f_i_f_o_8c}{F\+I\+F\+O.\+c}
+\begin{DoxyCompactList}\small\item\em Contains functions for initializing and manipulating data in F\+I\+FO arrays Initializes a F\+I\+FO by resetting values to 0 and also allows for the input and output of data to the U\+A\+RT module using a 256 bit shifting array. \end{DoxyCompactList}\item 
+file \hyperlink{_f_i_f_o_8h}{F\+I\+F\+O.\+h}
+\begin{DoxyCompactList}\small\item\em Routines to implement a F\+I\+FO buffer. \end{DoxyCompactList}\item 
+file \hyperlink{_flash_8c}{Flash.\+c}
+\begin{DoxyCompactList}\small\item\em Functions to control writing and erasing of the Flash memory module of the K70 Tower These functions allocate memory for and allow the programming of said memory in the Flash module. This is done via Launch\+Command calls which write or erase the necessary bytes via the F\+C\+C\+OB register. Note that for Lab 2, only one Phrase (8 bytes) maximum may be allocated at a time. \end{DoxyCompactList}\item 
+file \hyperlink{_flash_8h}{Flash.\+h}
+\begin{DoxyCompactList}\small\item\em Routines for erasing and writing to the Flash. \end{DoxyCompactList}\item 
+file \hyperlink{_f_t_m_8c}{F\+T\+M.\+c}
+\begin{DoxyCompactList}\small\item\em Routines for setting up the Flex\+Timer module (F\+TM) on the T\+W\+R-\/\+K70\+F120M. The F\+TM is primarily used for timing the L\+E\+Ds, allowing them to be turned on and off automatically. Eg. Having a blue L\+ED turn on for 1s whenever a valid packet is received. \end{DoxyCompactList}\item 
+file \hyperlink{_f_t_m_8h}{F\+T\+M.\+h}
+\begin{DoxyCompactList}\small\item\em Routines for setting up the Flex\+Timer module (F\+TM) on the T\+W\+R-\/\+K70\+F120M. \end{DoxyCompactList}\item 
+file \hyperlink{_l_e_ds_8c}{L\+E\+Ds.\+c}
+\begin{DoxyCompactList}\small\item\em Contains functions for initialising and controlling L\+ED pins on the Tower Initialises the appropriate Pin Control Registers (P\+C\+Rs) and allows for the turning on, off and toggling of four different L\+E\+Ds (Orange, Yellow, Green, Blue) on the Tower. \end{DoxyCompactList}\item 
+file \hyperlink{_l_e_ds_8h}{L\+E\+Ds.\+h}
+\begin{DoxyCompactList}\small\item\em Routines to access the L\+E\+Ds on the T\+W\+R-\/\+K70\+F120M. \end{DoxyCompactList}\item 
+file \hyperlink{main_8c}{main.\+c}
+\begin{DoxyCompactList}\small\item\em Main module. This module utilises the K70 Tower Device to input and output basic data packets in accordance to a Communication Protocol as described on U\+T\+S\+Online. It is to be used in conjunction with Tower\+P\+C.\+exe which sends and receives these packets to and from the Tower via a Windows PC. \end{DoxyCompactList}\item 
+file \hyperlink{packet_8c}{packet.\+c}
+\begin{DoxyCompactList}\small\item\em Contains functions for handling packets in accordance with the Tower Communication Protocol document Packet parameters are sent to and taken out of the U\+A\+RT module via these functions as well having parameters such as checksum verified to ensure valid packets are being read. \end{DoxyCompactList}\item 
+file \hyperlink{packet_8h}{packet.\+h}
+\begin{DoxyCompactList}\small\item\em Routines to implement packet encoding and decoding for the serial port. \end{DoxyCompactList}\item 
+file \hyperlink{_p_i_t_8c}{P\+I\+T.\+c}
+\begin{DoxyCompactList}\small\item\em Routines for controlling Periodic Interrupt Timer (P\+IT) on the T\+W\+R-\/\+K70\+F120M. This contains the functions for operating the periodic interrupt timer (P\+IT). \end{DoxyCompactList}\item 
+file \hyperlink{_p_i_t_8h}{P\+I\+T.\+h}
+\begin{DoxyCompactList}\small\item\em Routines for controlling Periodic Interrupt Timer (P\+IT) on the T\+W\+R-\/\+K70\+F120M. \end{DoxyCompactList}\item 
+file \hyperlink{_r_t_c_8c}{R\+T\+C.\+c}
+\begin{DoxyCompactList}\small\item\em Routines for controlling the Real Time Clock (R\+TC) on the T\+W\+R-\/\+K70\+F120M. This contains the functions for operating the real time clock (R\+TC). \end{DoxyCompactList}\item 
+file \hyperlink{_r_t_c_8h}{R\+T\+C.\+h}
+\begin{DoxyCompactList}\small\item\em Routines for controlling the Real Time Clock (R\+TC) on the T\+W\+R-\/\+K70\+F120M. \end{DoxyCompactList}\item 
+file \hyperlink{types_8h}{types.\+h}
+\begin{DoxyCompactList}\small\item\em Declares new types. \end{DoxyCompactList}\item 
+file \hyperlink{_u_a_r_t_8c}{U\+A\+R\+T.\+c}
+\begin{DoxyCompactList}\small\item\em Contains functions for using the K70 Tower U\+A\+RT (Universal Asynchronous Receiver Transmitter) Initializes the U\+A\+RT via register and baud rate settings as well as polling and manipulating the Transfer and Receive F\+I\+F\+Os to send and receive data from the PC. \end{DoxyCompactList}\item 
+file \hyperlink{_u_a_r_t_8h}{U\+A\+R\+T.\+h}
+\begin{DoxyCompactList}\small\item\em I/O routines for U\+A\+RT communications on the T\+W\+R-\/\+K70\+F120M. \end{DoxyCompactList}\end{DoxyCompactItemize}

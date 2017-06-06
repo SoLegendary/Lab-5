@@ -46,8 +46,6 @@
 #include "median.h"
 #include "OS.h"
 #include "PE_Types.h"
-#include "PE_Error.h"
-#include "PE_Const.h"
 #include "IO_Map.h"
 
 
@@ -65,6 +63,9 @@
 #define THREAD_STACK_SIZE 1024
 
 
+static TFTMChannel FTM0Channel0; // Struct to set up channel 0 in the FTM module
+static TAccelSetup accelSetup; // Struct to set up the accelerometer via I2C0
+
 volatile uint16union_t *towerNumber = NULL; // Currently set tower number and mode
 volatile uint16union_t *towerMode   = NULL;
 
@@ -73,23 +74,21 @@ static TAccelData accelDataNew; // latest XYZ accelerometer data
 
 static bool synchronousMode = false; // variable to track current I2C mode (synchronous by default)
 
-// RTOS Threads stacks - macro declares a variable with name of the first argument
-OS_THREAD_STACK(InitThreadStack, THREAD_STACK_SIZE);
-OS_THREAD_STACK(RTCThreadStack, THREAD_STACK_SIZE);
-OS_THREAD_STACK(PacketThreadStack, THREAD_STACK_SIZE);
-OS_THREAD_STACK(FTM0ThreadStack, THREAD_STACK_SIZE);
-OS_THREAD_STACK(PITThreadStack, THREAD_STACK_SIZE);
-OS_THREAD_STACK(AccelThreadStack, THREAD_STACK_SIZE);
-OS_THREAD_STACK(I2CThreadStack, THREAD_STACK_SIZE);
+// RTOS Threads stacks
+static uint32_t InitThreadStack[THREAD_STACK_SIZE] __attribute__ ((aligned(0x08)));
+static uint32_t RTCThreadStack[THREAD_STACK_SIZE] __attribute__ ((aligned(0x08)));
+static uint32_t PacketThreadStack[THREAD_STACK_SIZE] __attribute__ ((aligned(0x08)));
+static uint32_t FTM0ThreadStack[THREAD_STACK_SIZE] __attribute__ ((aligned(0x08)));
+static uint32_t PITThreadStack[THREAD_STACK_SIZE] __attribute__ ((aligned(0x08)));
+static uint32_t AccelThreadStack[THREAD_STACK_SIZE] __attribute__ ((aligned(0x08)));
+static uint32_t I2CThreadStack[THREAD_STACK_SIZE] __attribute__ ((aligned(0x08)));
 
-
-// RTOS Semaphores - all initialised as 0 (ie. threads can't run before being signaled)
-OS_ECB* RTCSemaphore    = OS_SemaphoreCreate(0);
-OS_ECB* PacketSemaphore = OS_SemaphoreCreate(0);
-OS_ECB* FTM0Semaphore   = OS_SemaphoreCreate(0);
-OS_ECB* PITSemaphore    = OS_SemaphoreCreate(0);
-OS_ECB* AccelSemaphore  = OS_SemaphoreCreate(0);
-OS_ECB* I2CSemaphore    = OS_SemaphoreCreate(0);
+// RTOS Semaphores as private globals
+static OS_ECB* RTCSemaphore;
+static OS_ECB* FTM0Semaphore;
+static OS_ECB* PITSemaphore;
+static OS_ECB* AccelSemaphore;
+static OS_ECB* I2CSemaphore;
 
 
 // Function Initializations
@@ -400,28 +399,35 @@ static void InitThread(void* pData)
 {
   __DI(); // Disable interrupts
 
+  // RTOS Semaphores - all initialised as 0 (ie. threads can't run before being signaled)
+  RTCSemaphore    = OS_SemaphoreCreate(0);
+  FTM0Semaphore   = OS_SemaphoreCreate(0);
+  PITSemaphore    = OS_SemaphoreCreate(0);
+  AccelSemaphore  = OS_SemaphoreCreate(0);
+  I2CSemaphore    = OS_SemaphoreCreate(0);
+
   const uint32_t BAUDRATE      = 115200;
   const uint32_t ACCELBAUDRATE = 100000;
 
-  TFTMChannel FTM0Channel0; // Struct to set up channel 0 in the FTM module
+  // Setting up FTM channel 0 struct
   FTM0Channel0.channelNb           = 0;
   FTM0Channel0.timerFunction       = TIMER_FUNCTION_OUTPUT_COMPARE;
   FTM0Channel0.ioType.outputAction = TIMER_OUTPUT_LOW;
   FTM0Channel0.semaphore           = FTM0Semaphore;
 
-  TAccelSetup accelSetup; // Struct to set up the accelerometer via I2C0
+  // Setting up accel init struct
   accelSetup.moduleClk             = CPU_BUS_CLK_HZ;
   accelSetup.dataReadySemaphore    = AccelSemaphore;
   accelSetup.readCompleteSemaphore = I2CSemaphore;
 
-  Packet_Init(BAUDRATE, CPU_BUS_CLK_HZ, PacketSemaphore);
+  Packet_Init(BAUDRATE, CPU_BUS_CLK_HZ);
   Flash_Init();
   LEDs_Init();
   FTM_Init();
   FTM_Set(&FTM0Channel0);
-  PIT_Init(CPU_BUS_CLK_HZ, FTM0Semaphore);
-  // RTC_Init(RTCSemaphore);
-  Accel_Init(&accelSetup));
+  PIT_Init(CPU_BUS_CLK_HZ, PITSemaphore);
+  RTC_Init(RTCSemaphore);
+  Accel_Init(&accelSetup);
 
   // Polling mode by default for accelerometer
   PIT_Set(1000000000, true);
@@ -560,7 +566,11 @@ static void PacketThread(void* pData)
   for (;;)
   {
     if (Packet_Get()) // If a packet is received.
+    {
+      LEDs_On(LED_BLUE);
+      FTM_StartTimer(&FTM0Channel0);
       HandlePacket(); // Handle the packet appropriately.
+    }
   }
 }
 
@@ -607,25 +617,25 @@ int main(void)
           &FTM0ThreadStack[THREAD_STACK_SIZE - 1],
 	  4);
 
-  error = OS_ThreadCreate(PITThread,
-          NULL,
-          &PITThreadStack[THREAD_STACK_SIZE - 1],
-	  5);
+  //error = OS_ThreadCreate(PITThread,
+  //        NULL,
+  //        &PITThreadStack[THREAD_STACK_SIZE - 1],
+//	  5);
 
   error = OS_ThreadCreate(AccelThread,
           NULL,
           &AccelThreadStack[THREAD_STACK_SIZE - 1],
-	  6);
+  	  5);
 
   error = OS_ThreadCreate(I2CThread,
           NULL,
           &I2CThreadStack[THREAD_STACK_SIZE - 1],
-	  7);
+  	  6);
 	  
   error = OS_ThreadCreate(PacketThread,
           NULL,
           &PacketThreadStack[THREAD_STACK_SIZE - 1],
-	  8);
+	  7);
 	  
   // Start multithreading - never returns!
   // NOTE that this still runs threads that are created in lower levels inside modules

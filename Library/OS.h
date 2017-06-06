@@ -22,13 +22,6 @@
 #define OS_PRIORITY_SELF          255
 
 // ----------------------------------------
-// OS thread stacks
-// x = name of stack
-// y = size of stack
-
-#define OS_THREAD_STACK(x, y) static uint32_t x[y] __attribute__ ((aligned(0x08)))
-
-// ----------------------------------------
 // OS error codes
 
 typedef enum

@@ -17,11 +17,11 @@
 #include "OS.h"
 
 // Private global variable for the PIT thread semaphore
-static ECB* PITSemaphore;
+static OS_ECB* PITSemaphore;
 
 
 
-bool PIT_Init(const uint32_t moduleClk, ECB* semaphore)
+bool PIT_Init(const uint32_t moduleClk, OS_ECB* semaphore)
 {
   // saving semaphore for use in the ISR
   PITSemaphore = semaphore;

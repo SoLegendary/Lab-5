@@ -13,6 +13,7 @@
 
 // new types
 #include "types.h"
+#include "OS.h"
 
 /*! @brief Sets up the PIT before first use.
  *
@@ -22,7 +23,7 @@
  *  @return bool - TRUE if the PIT was successfully initialized.
  *  @note Assumes that moduleClk has a period which can be expressed as an integral number of nanoseconds.
  */
-bool PIT_Init(const uint32_t moduleClk, ECB* semaphore);
+bool PIT_Init(const uint32_t moduleClk, OS_ECB* semaphore);
 
 /*! @brief Sets the value of the desired period of the PIT.
  *

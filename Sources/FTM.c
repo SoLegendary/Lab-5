@@ -18,7 +18,7 @@
 #include "OS.h"
 
 // Private global variable for the FTM thread semaphore for every channel
-static ECB* FTMSemaphore[8];
+static OS_ECB* FTMSemaphore[8];
 
 
 
@@ -27,9 +27,9 @@ bool FTM_Init(void)
   // Enabling clock gate for FTM0=
   SIM_SCGC6 |= SIM_SCGC6_FTM0_MASK;
 	
-  FTM0_CNTIN |= FTM_CNTIN_INIT(0); // Initial FTM value
-  FTM0_MOD   |= FTM_MOD_MOD(0);    // Modulo value
-  FTM0_CNT   |= FTM_CNT_COUNT(0);  // Counter value
+  FTM0_CNTIN = ~FTM_CNTIN_INIT_MASK; // Free-running counter
+  FTM0_MOD   = FTM_MOD_MOD_MASK;     // Modulo value
+  FTM0_CNT   = ~FTM_CNT_COUNT_MASK;  // Counter value
   FTM0_SC    |= FTM_SC_CLKS(0x2);    // Clock source selection set to 'fixed freq. clock'
   
   // Setting up NVIC for FTM see K70 manual pg 97
@@ -50,9 +50,12 @@ bool FTM_Set(const TFTMChannel* const aFTMChannel)
   // See table 43.67 on pg 1219 of the K70 manual for the IO options for FTM channels
  
   uint8_t channelNb = aFTMChannel->channelNb;
+
+  if (aFTMChannel->channelNb > 7) // channelNb out of range
+    return false;
+
   
-  // Channel Interrupt Enable
-  FTM0_CnSC(channelNb) |= FTM_CnSC_CHIE_MASK;
+
   
   // Saving semaphore for this channel
   FTMSemaphore[channelNb]    = aFTMChannel->semaphore;
@@ -125,6 +128,10 @@ bool FTM_StartTimer(const TFTMChannel* const aFTMChannel)
   
   uint8_t channelNb = aFTMChannel->channelNb;
 
+  if (aFTMChannel->channelNb > 7) // channelNb out of range
+    return false;
+
+
   // If channel was not set up for output compare (ie. MSnB:MSnA != 01)
   if ((FTM0_CnSC(channelNb) & FTM_CnSC_MSB_MASK) ||
      !(FTM0_CnSC(channelNb) & FTM_CnSC_MSA_MASK))
@@ -135,9 +142,10 @@ bool FTM_StartTimer(const TFTMChannel* const aFTMChannel)
   // 2. Set output compare register to CNT + delay
   FTM0_CnV(channelNb) = counterValue + aFTMChannel->delayCount;
   // 3. Clear output compare flag
-  FTM0_CnSC(channelNb) = FTM_CnSC_CHF_MASK;
+  FTM0_CnSC(channelNb) &= ~FTM_CnSC_CHF_MASK;
   // 4. Output compare flag will now set and trigger an interrupt after the delay
-  
+  FTM0_CnSC(channelNb) |= FTM_CnSC_CHIE_MASK;
+
   return true;
 }
 
@@ -156,7 +164,10 @@ void __attribute__ ((interrupt)) FTM0_ISR(void)
     // If channel is set up for output compare (ie. MSnB:MSnA == 01)
     if (!(FTM0_CnSC(channelNb) & FTM_CnSC_MSB_MASK) &&
          (FTM0_CnSC(channelNb) & FTM_CnSC_MSA_MASK))
+    {
+      FTM0_CnSC(channelNb) &= ~FTM_CnSC_CHIE_MASK;
       OS_SemaphoreSignal(FTMSemaphore[channelNb]);
+    }
   }
   
   OS_ISRExit();

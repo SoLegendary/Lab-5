@@ -24,12 +24,12 @@
 static TFIFO TxFIFO, RxFIFO; // Transfer & Receiver FIFO declaration
 
 // Stacks for FIFO threads
-OS_THREAD_STACK(FIFOPutThreadStack, THREAD_STACK_SIZE);
-OS_THREAD_STACK(FIFOGetThreadStack, THREAD_STACK_SIZE);
+static uint32_t FIFOPutThreadStack[THREAD_STACK_SIZE] __attribute__ ((aligned(0x08)));
+static uint32_t FIFOGetThreadStack[THREAD_STACK_SIZE] __attribute__ ((aligned(0x08)));
 
 // Semaphores for FIFO threads
-static ECB* FIFOPutSemaphore = OS_SemaphoreCreate(0);
-static ECB* FIFOGetSemaphore = OS_SemaphoreCreate(0);
+static OS_ECB* FIFOPutSemaphore;
+static OS_ECB* FIFOGetSemaphore;
 
 
 
@@ -53,6 +53,7 @@ static void FIFOGetThread(void* pData)
   {
     OS_SemaphoreWait(FIFOGetSemaphore,0);
     FIFO_Get(&TxFIFO, (uint8_t *)&UART2_D); // Get a character from the transfer FIFO
+    UART2_C2 |= UART_C2_TIE_MASK; // Sets the TIE flag to indicate there's a character in the TxFIFO
   }
 }
 
@@ -66,6 +67,10 @@ bool UART_Init(const uint32_t baudRate, const uint32_t moduleClk)
 {
   FIFO_Init(&TxFIFO); //Initialization of Transfer FIFO
   FIFO_Init(&RxFIFO); //Initialization of Receiver FIFO
+
+  // initialising semaphores
+  FIFOPutSemaphore = OS_SemaphoreCreate(0);
+  FIFOGetSemaphore = OS_SemaphoreCreate(0);
 
   OS_ERROR error; // error object for RTOS
 
@@ -149,14 +154,14 @@ bool UART_InChar(uint8_t * const dataPtr)
 
 bool UART_OutChar(const uint8_t data)
 {
-  if (FIFO_Put(&TxFIFO, data)) // Attempts to put a character into the transfer FIFO
-  {
-    EnterCritical(); // Nesting-compatible Interrupt Disable
-    UART2_C2 |= UART_C2_TIE_MASK; // Sets the TIE flag to indicate there's a character in the TxFIFO
-    ExitCritical(); // Nesting-compatible Interrupt Enable
-    return true;
-  }
-  return false; // Returns false if there was a problem putting a char into TxFIFO
+  return (FIFO_Put(&TxFIFO, data)); // Attempts to put a character into the transfer FIFO
+ // {
+    //EnterCritical(); // Nesting-compatible Interrupt Disable
+    //UART2_C2 |= UART_C2_TIE_MASK; // Sets the TIE flag to indicate there's a character in the TxFIFO
+    //ExitCritical(); // Nesting-compatible Interrupt Enable
+    //return true;
+  //}
+  //return false; // Returns false if there was a problem putting a char into TxFIFO
 }
 
 
@@ -184,7 +189,10 @@ void __attribute__ ((interrupt)) UART_ISR(void)
   if (UART2_C2 & UART_C2_TIE_MASK) // If the interrupt was due to transmitting a character
   {
     if (UART2_S1 & UART_S1_TDRE_MASK) // If Tower->PC data is waiting to be read, get a character out of the transfer FIFO
+    {
+      UART2_C2 &= ~UART_C2_TIE_MASK;
       OS_SemaphoreSignal(FIFOGetSemaphore);
+    }
   }
   
   OS_ISRExit();

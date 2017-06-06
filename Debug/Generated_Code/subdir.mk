@@ -5,17 +5,14 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../Generated_Code/Cpu.c \
-../Generated_Code/PE_LDD.c \
 ../Generated_Code/Vectors.c 
 
 OBJS += \
 ./Generated_Code/Cpu.o \
-./Generated_Code/PE_LDD.o \
 ./Generated_Code/Vectors.o 
 
 C_DEPS += \
 ./Generated_Code/Cpu.d \
-./Generated_Code/PE_LDD.d \
 ./Generated_Code/Vectors.d 
 
 
@@ -23,7 +20,7 @@ C_DEPS += \
 Generated_Code/%.o: ../Generated_Code/%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: Cross ARM C Compiler'
-	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -O0 -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections  -g3 -I"/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Static_Code/IO_Map" -I"/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Sources" -I"/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Generated_Code" -I"/Users/emilefadel/Documents/University/48434 Embedded Software/Lab-3/Static_Code/PDD" -std=c99 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -c -o "$@" "$<"
+	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -O0 -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections  -g3 -I"C:\Users\11988401\Desktop\Lab-5-Workspace\Lab-5-Initial\Library" -I"C:/Users/11988401/Desktop/Lab-5-Workspace/Lab-5-Initial/Static_Code/IO_Map" -I"C:/Users/11988401/Desktop/Lab-5-Workspace/Lab-5-Initial/Sources" -I"C:/Users/11988401/Desktop/Lab-5-Workspace/Lab-5-Initial/Generated_Code" -std=c99 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -c -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

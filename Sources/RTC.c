@@ -17,41 +17,36 @@
 #include "OS.h"
 
 // Private global variable for the RTC thread semaphore
-static ECB* RTCSemaphore;
+static OS_ECB* RTCSemaphore;
 
 
 
-bool RTC_Init(ECB* semaphore)
+bool RTC_Init(OS_ECB* semaphore)
 {
   // saving semaphore into global variable
   RTCSemaphore = semaphore;
 
   // Enabling clock gate for RTC
-  SIM_SCGC5 |= SIM_SCGC6_RTC_MASK;
+  SIM_SCGC6 |= SIM_SCGC6_RTC_MASK;
 
   // Enabling 18pF capacitance load on crystal
   RTC_CR |= RTC_CR_SC16P_MASK;
   RTC_CR |= RTC_CR_SC2P_MASK;
-	
-  // Enables the 32.768 kHz oscillator. After setting this bit, wait the oscillator startup 
-  // time before enabling the time counter to allow the 32.768 kHz clock time to stabilize.
-  RTC_CR |= RTC_CR_OSCE_MASK;
-	
-  for (uint32_t i; i < 50000000; i++){;}
   
   // Time Seconds Interrupt Enable (allows interrupts every second using the time seconds register)
   RTC_IER |= RTC_IER_TSIE_MASK;
-  
-  // Locks the control register until reset (0 == locked, 1 == unlocked)
-  RTC_LR &= ~RTC_LR_CRL_MASK;
 
-  // For loop to wait for the clock to stabilize before enabling the Time Counter
-  // We need to test and find out the oscillator startup time, and then get the for loop to emulate this time
-  // for (uint8_t i = 0; i < 1000; i++){}
+  // Enables the 32.768 kHz oscillator. After setting this bit, wait the oscillator startup
+  // time before enabling the time counter to allow the 32.768 kHz clock time to stabilize.
+  RTC_CR |= RTC_CR_OSCE_MASK;
+  for (uint32_t i; i < 50000000; i++){;}
 
   // Time Counter Enabled
   RTC_SR |= RTC_SR_TCE_MASK;
 	
+  // Locks the control register until reset (0 == locked, 1 == unlocked)
+  RTC_LR &= ~RTC_LR_CRL_MASK;
+
   // Setting up NVIC for RTC see K70 manual pg 97, 99
   // Vector=83, IRQ=67
   // NVIC non-IPR=2 IPR=16

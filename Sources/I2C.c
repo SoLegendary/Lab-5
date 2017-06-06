@@ -20,7 +20,7 @@
 #include "OS.h"
 
 // Private global variable for the I2C thread semaphore
-ECB* ReadCompleteSemaphore;
+OS_ECB* ReadCompleteSemaphore;
 
 
 static uint8_t PrimarySlaveAddress = 0; // private global variable to track accelerometer slave address
@@ -39,9 +39,19 @@ static const uint16_t SclDivider[64] = {
 160,192,224,256,288,320,384,480,320,384,448,512,576,640,768,960,
 640,768,896,1024,1152,1280,1536,1920,1280,1536,1792,2048,2304,2560,3072,3840};
 
-	
+// Binary semaphores (mutexes) allowing exclusive access to I2C reads and writes
+static OS_ECB* WriteAccess;
+static OS_ECB* PollReadAccess;
+static OS_ECB* IntReadAccess;
+
+
 bool I2C_Init(const TI2CModule* const aI2CModule, const uint32_t moduleClk)
 {
+  // Initialise access semaphores to 1
+  WriteAccess    = OS_SemaphoreCreate(1);
+  PollReadAccess = OS_SemaphoreCreate(1);
+  IntReadAccess  = OS_SemaphoreCreate(1);
+
   // System clock gate enable
   SIM_SCGC4 |= SIM_SCGC4_IIC0_MASK;
 	
@@ -129,6 +139,7 @@ void I2C_SelectSlaveDevice(const uint8_t slaveAddress)
 // follows pg. 19 of accelerometer manual - single-byte write
 void I2C_Write(const uint8_t registerAddress, const uint8_t data)
 {
+  OS_SemaphoreWait(WriteAccess,0);
 
   while (I2C0_S & I2C_S_BUSY_MASK)
   {
@@ -162,6 +173,8 @@ void I2C_Write(const uint8_t registerAddress, const uint8_t data)
   }
   
   I2C0_C1 &= ~I2C_C1_MST_MASK; // STOP signal
+
+  OS_SemaphoreSignal(WriteAccess);
 }
 
 
@@ -169,6 +182,8 @@ void I2C_Write(const uint8_t registerAddress, const uint8_t data)
 // follows pg. 19 of accelerometer manual - multi-byte read
 void I2C_PollRead(const uint8_t registerAddress, uint8_t* const data, const uint8_t nbBytes)
 {
+  OS_SemaphoreWait(PollReadAccess,0);
+
   while (I2C0_S & I2C_S_BUSY_MASK)
   {
   } // wait until bus is idle
@@ -213,12 +228,16 @@ void I2C_PollRead(const uint8_t registerAddress, uint8_t* const data, const uint
     if ((i < 3) && (I2C0_S & I2C_S_RXAK_MASK)) // if no AK received during write stages, end the communication
       break;
   }
+
+  OS_SemaphoreSignal(PollReadAccess);
 }
 
 
 
 void I2C_IntRead(const uint8_t registerAddress, uint8_t* const data, const uint8_t nbBytes)
 {
+  OS_SemaphoreWait(IntReadAccess,0);
+
   while (I2C0_S & I2C_S_BUSY_MASK)
   {
   } // wait until bus is idle
@@ -256,6 +275,8 @@ void I2C_IntRead(const uint8_t registerAddress, uint8_t* const data, const uint8
   }
   
   // ISR should trigger here, following the flowchart
+
+  OS_SemaphoreSignal(IntReadAccess);
 }
 
 
@@ -280,7 +301,7 @@ void __attribute__ ((interrupt)) I2C_ISR(void)
       else if (dataIndex == (IsrNbBytes - 1)) //2nd last byte to read
         I2C0_C1 |= I2C_C1_TXAK_MASK;
       
-	  
+
       IsrData[dataIndex] = I2C0_D; // Read from data reg and store
 	  
       // If last byte to read, reset index and callback

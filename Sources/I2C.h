@@ -23,7 +23,7 @@ typedef struct
 {
   uint8_t primarySlaveAddress;
   uint32_t baudRate;
-  ECB* readCompleteSemaphore;
+  OS_ECB* readCompleteSemaphore;
 } TI2CModule;
 
 /*! @brief Sets up the I2C before first use.

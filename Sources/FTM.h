@@ -13,6 +13,7 @@
 
 // new types
 #include "types.h"
+#include "OS.h"
 
 typedef enum
 {
@@ -46,7 +47,7 @@ typedef struct
     TTimerOutputAction outputAction;
     TTimerInputDetection inputDetection;
   } ioType;
-  ECB* semaphore;
+  OS_ECB* semaphore;
 } TFTMChannel;
 
 

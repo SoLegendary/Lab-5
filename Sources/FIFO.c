@@ -18,7 +18,7 @@
 #include "OS.h"
 
 // Binary semaphore ensuring only one thread accesses the semaphore at a time
-static ECB* FIFOAccess = OS_SemaphoreCreate(1);
+static OS_ECB* FIFOAccess;
 
 
 /*!
@@ -26,6 +26,8 @@ static ECB* FIFOAccess = OS_SemaphoreCreate(1);
  */
 void FIFO_Init(TFIFO * const FIFO)
 {
+  FIFOAccess = OS_SemaphoreCreate(1); // creating semaphore
+
   FIFO->Start     = 0;
   FIFO->End       = 0;
   FIFO->UsedBytes = OS_SemaphoreCreate(0);

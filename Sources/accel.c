@@ -191,7 +191,7 @@ static union
 
 
 // Private global variable for the Accel thread semaphore
-ECB* DataReadySemaphore;
+OS_ECB* DataReadySemaphore;
 
 static bool SynchronousMode = false; // private global to track whether we are in polling or interrupt mode
 
@@ -235,7 +235,7 @@ bool Accel_Init(const TAccelSetup* const accelSetup)
 
 
   // Saving semaphore
-  DataReadySemaphore  = accelSetup->dataReadySemaphore
+  DataReadySemaphore  = accelSetup->dataReadySemaphore;
   
   // Setting up NVIC for PORTB see K70 manual pg 97
   // Vector=104, IRQ=88

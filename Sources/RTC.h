@@ -13,6 +13,7 @@
 
 // new types
 #include "types.h"
+#include "OS.h"
 
 /*! @brief Initializes the RTC before first use.
  *
@@ -21,7 +22,7 @@
  *  @param pointer to a semaphore for signaling in the ISR
  *  @return bool - TRUE if the RTC was successfully initialized.
  */
-bool RTC_Init(ECB* semaphore);
+bool RTC_Init(OS_ECB* semaphore);
 
 /*! @brief Sets the value of the real time clock.
  *

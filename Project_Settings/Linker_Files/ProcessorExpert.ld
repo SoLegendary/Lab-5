@@ -4,13 +4,13 @@
 /*##                                   */
 /*##     Filename  : ProcessorExpert.ld */
 /*##                                   */
-/*##     Project   : Lab-3             */
+/*##     Project   : Lab3              */
 /*##                                   */
 /*##     Processor : MK70FN1M0VMJ12    */
 /*##                                   */
 /*##     Compiler  : GNU C Compiler    */
 /*##                                   */
-/*##     Date/Time : 2017-05-02, 18:06, # CodeGen: 0 */
+/*##     Date/Time : 2015-08-17, 00:21, # CodeGen: 0 */
 /*##                                   */
 /*##     Abstract  :                   */
 /*##                                   */
@@ -171,7 +171,7 @@ SECTIONS
   ___m_data_20000000_ROMSize = ___m_data_20000000_RAMEnd - ___m_data_20000000_RAMStart;
 
 
-  
+
   /* Uninitialized data section */
   . = ALIGN(4);
   .bss :
@@ -204,17 +204,12 @@ SECTIONS
     LONG(0);
   } > m_data
   
-  text_end = ORIGIN(m_text) + LENGTH(m_text);
-  data_init_end = ___m_data_20000000_ROMStart + SIZEOF(.m_data_20000000) + SIZEOF(.romp);
-  ASSERT( data_init_end <= text_end, "region m_text overflowed with text and data")
-  
   /* User_heap_stack section, used to check that there is enough RAM left */
   ._user_heap_stack :
   {
     . = ALIGN(4);
     PROVIDE ( end = . );
     PROVIDE ( _end = . );
-    PROVIDE ( __end__ = . );
     __heap_addr = .;
     __HeapBase = .;
     . = . + __heap_size;

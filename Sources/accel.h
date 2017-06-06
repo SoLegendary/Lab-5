@@ -28,8 +28,8 @@ typedef enum
 typedef struct
 {
   uint32_t moduleClk;	/*!< The module clock rate in Hz. */
-  ECB* dataReadySemaphore;
-  ECB* readCompleteSemaphore;
+  OS_ECB* dataReadySemaphore;
+  OS_ECB* readCompleteSemaphore;
 } TAccelSetup;
 
 #pragma pack(push)

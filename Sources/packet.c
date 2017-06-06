@@ -25,9 +25,9 @@ const uint8_t PACKET_ACK_MASK = 0x80; // Acknowledgment Bit Mask in Hex
 
 
 
-bool Packet_Init(const uint32_t baudRate, const uint32_t moduleClk, ECB* semaphore)
+bool Packet_Init(const uint32_t baudRate, const uint32_t moduleClk)
 {
-  return UART_Init(baudRate, moduleClk, semaphore); // Simply send parameters along to UART_Init
+  return UART_Init(baudRate, moduleClk); // Simply send parameters along to UART_Init
 }
 
 
@@ -66,9 +66,6 @@ bool Packet_Get(void)
 	TFTMChannel FTM0Channel0; // Struct to start a timer in Channel 0
 	FTM0Channel0.channelNb  = 0;
 	FTM0Channel0.delayCount = 1;
-
-	LEDs_On(LED_BLUE);
-	FTM_StartTimer(&FTM0Channel0);
 
 	return true;
       }

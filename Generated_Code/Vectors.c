@@ -59,7 +59,8 @@
   #include "FTM.h"
   #include "RTC.h"
   #include "UART.h"
-  #include "Events.h"
+  #include "Accel.h"
+  #include "I2C.h"
 
 
   /* ISR prototype */

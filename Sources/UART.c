@@ -41,6 +41,7 @@ static void FIFOPutThread(void* pData)
   {
     OS_SemaphoreWait(FIFOPutSemaphore,0);
     FIFO_Put(&RxFIFO, UART2_D); // Put a character into the receive FIFO
+    UART2_C2 |= UART_C2_RIE_MASK;
   }
 }
 
@@ -183,7 +184,10 @@ void __attribute__ ((interrupt)) UART_ISR(void)
   if (UART2_C2 & UART_C2_RIE_MASK) // If the interrupt was due to receiving a character
   {
     if (UART2_S1 & UART_S1_RDRF_MASK) // If PC->Tower data is waiting to be read, put a character into the receive FIFO
+    {
+      UART2_C2 &= ~UART_C2_RIE_MASK;
       OS_SemaphoreSignal(FIFOPutSemaphore);
+    }
   }
 
   if (UART2_C2 & UART_C2_TIE_MASK) // If the interrupt was due to transmitting a character

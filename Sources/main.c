@@ -64,15 +64,15 @@
 
 
 static TFTMChannel FTM0Channel0; // Struct to set up channel 0 in the FTM module
-static TAccelSetup accelSetup; // Struct to set up the accelerometer via I2C0
+static TAccelSetup AccelSetup; // Struct to set up the accelerometer via I2C0
 
-volatile uint16union_t *towerNumber = NULL; // Currently set tower number and mode
-volatile uint16union_t *towerMode   = NULL;
+volatile uint16union_t *TowerNumber = NULL; // Currently set tower number and mode
+volatile uint16union_t *TowerMode   = NULL;
 
-static TAccelData accelDataOld; // oldest XYZ accelerometer data - only used in asynchronous polling mode
-static TAccelData accelDataNew; // latest XYZ accelerometer data
+static TAccelData AccelDataOld; // oldest XYZ accelerometer data - only used in asynchronous polling mode
+static TAccelData AccelDataNew; // latest XYZ accelerometer data
 
-static bool synchronousMode = false; // variable to track current I2C mode (synchronous by default)
+static bool SynchronousMode = false; // variable to track current I2C mode (synchronous by default)
 
 // RTOS Threads stacks
 static uint32_t InitThreadStack[THREAD_STACK_SIZE] __attribute__ ((aligned(0x08)));
@@ -116,19 +116,19 @@ bool HandleStartupPacket(void)
   defaultTowerMode.s.Hi = 0x00;
   defaultTowerMode.s.Lo = 0x01;
 
-  if (towerNumber == NULL) // If towerNumber is not yet programmed, save it to flash
+  if (TowerNumber == NULL) // If TowerNumber is not yet programmed, save it to flash
   {
     // Note that the void* typecast does not appear in lab 2 notes
-    success = Flash_AllocateVar((void*)&towerNumber, sizeof(*towerNumber));
-    success = Flash_Write16((uint16_t*)towerNumber, studentNumber.l);
+    success = Flash_AllocateVar((void*)&TowerNumber, sizeof(*TowerNumber));
+    success = Flash_Write16((uint16_t*)TowerNumber, studentNumber.l);
     if (!success) // If Flash_Allocate or Flash_Write failed
       return false;
   }
 
-  if (towerMode == NULL) // If towerMode is not yet programmed, save it to flash
+  if (TowerMode == NULL) // If TowerMode is not yet programmed, save it to flash
   {
-    success = Flash_AllocateVar((void*)&towerMode, sizeof(*towerMode));
-    success = Flash_Write16((uint16_t*)towerMode, defaultTowerMode.l);
+    success = Flash_AllocateVar((void*)&TowerMode, sizeof(*TowerMode));
+    success = Flash_Write16((uint16_t*)TowerMode, defaultTowerMode.l);
     if (!success)
       return false;
   }
@@ -136,8 +136,8 @@ bool HandleStartupPacket(void)
 
   return ((Packet_Put(CMD_STARTUP, 0x00, 0x00, 0x00)) &&
 	  (Packet_Put(CMD_VERSION, 'v', 0x01, 0x00)) &&
-	  (Packet_Put(CMD_NUMBER, 0x01, towerNumber->s.Lo, towerNumber->s.Hi)) &&
-	  (Packet_Put(CMD_TOWERMODE, 0x01, towerMode->s.Lo, towerMode->s.Hi)) &&
+	  (Packet_Put(CMD_NUMBER, 0x01, TowerNumber->s.Lo, TowerNumber->s.Hi)) &&
+	  (Packet_Put(CMD_TOWERMODE, 0x01, TowerMode->s.Lo, TowerMode->s.Hi)) &&
 	  (Packet_Put(CMD_MODE, 0x01, synchronousMode, 0x00)));
 }
 
@@ -168,13 +168,13 @@ bool HandleNumberPacket(void)
 {
   if (Packet_Parameter1 == 0x02) // If the packet is in SET mode, set the tower number by storing it in flash before returning the packet
   {
-    bool success = Flash_Write16((uint16_t*)towerNumber, Packet_Parameter23);
+    bool success = Flash_Write16((uint16_t*)TowerNumber, Packet_Parameter23);
 
-    return Packet_Put(CMD_NUMBER, 0x01, towerNumber->s.Lo, towerNumber->s.Hi) && success;
+    return Packet_Put(CMD_NUMBER, 0x01, TowerNumber->s.Lo, TowerNumber->s.Hi) && success;
   }
   else if (Packet_Parameter1 == 0x01) // If the packet is in GET mode, just return the current tower number
   {
-    return Packet_Put(CMD_NUMBER, 0x01, towerNumber->s.Lo, towerNumber->s.Hi);
+    return Packet_Put(CMD_NUMBER, 0x01, TowerNumber->s.Lo, TowerNumber->s.Hi);
   }
 
   // If the packet is not in either SET or GET mode, return false
@@ -195,11 +195,11 @@ bool HandleTowerModePacket(void)
 {
   if (Packet_Parameter1 == 0x02) // If the packet is in SET mode, set the tower mode by storing it in flash before returning the packet
   {
-    bool success = Flash_Write16((uint16_t*)towerMode, Packet_Parameter23);
-    return Packet_Put(CMD_TOWERMODE, 0x01, towerMode->s.Lo, towerMode->s.Hi) && success;
+    bool success = Flash_Write16((uint16_t*)TowerMode, Packet_Parameter23);
+    return Packet_Put(CMD_TOWERMODE, 0x01, TowerMode->s.Lo, TowerMode->s.Hi) && success;
   }
   else if (Packet_Parameter1 == 0x01) // If the packet is in GET mode, just return the current tower mode
-    return Packet_Put(CMD_TOWERMODE, 0x01, towerMode->s.Lo, towerMode->s.Hi);
+    return Packet_Put(CMD_TOWERMODE, 0x01, TowerMode->s.Lo, TowerMode->s.Hi);
 
   // If the packet is not in either SET or GET mode, return false
   return false;
@@ -416,9 +416,9 @@ static void InitThread(void* pData)
   FTM0Channel0.semaphore           = FTM0Semaphore;
 
   // Setting up accel init struct
-  accelSetup.moduleClk             = CPU_BUS_CLK_HZ;
-  accelSetup.dataReadySemaphore    = AccelSemaphore;
-  accelSetup.readCompleteSemaphore = I2CSemaphore;
+  AccelSetup.moduleClk             = CPU_BUS_CLK_HZ;
+  AccelSetup.dataReadySemaphore    = AccelSemaphore;
+  AccelSetup.readCompleteSemaphore = I2CSemaphore;
 
   Packet_Init(BAUDRATE, CPU_BUS_CLK_HZ);
   Flash_Init();
@@ -427,7 +427,7 @@ static void InitThread(void* pData)
   FTM_Set(&FTM0Channel0);
   PIT_Init(CPU_BUS_CLK_HZ, PITSemaphore);
   RTC_Init(RTCSemaphore);
-  Accel_Init(&accelSetup);
+  Accel_Init(&AccelSetup);
 
   // Polling mode by default for accelerometer
   PIT_Set(1000000000, true);
@@ -489,18 +489,18 @@ static void PITThread(void* pData)
     OS_SemaphoreWait(PITSemaphore,0);
 
     // shift new data into old before getting new data
-    accelDataOld.bytes[0] = accelDataNew.bytes[0];
-    accelDataOld.bytes[1] = accelDataNew.bytes[1];
-    accelDataOld.bytes[2] = accelDataNew.bytes[2];
+    AccelDataOld.bytes[0] = AccelDataNew.bytes[0];
+    AccelDataOld.bytes[1] = AccelDataNew.bytes[1];
+    AccelDataOld.bytes[2] = AccelDataNew.bytes[2];
 
-    Accel_ReadXYZ(accelDataNew.bytes);
+    Accel_ReadXYZ(AccelDataNew.bytes);
 
    // If any axes are new, send the packet and toggle green LED
-     if((accelDataOld.bytes[0] != accelDataNew.bytes[0]) ||
-        (accelDataOld.bytes[1] != accelDataNew.bytes[1]) ||
-        (accelDataOld.bytes[2] != accelDataNew.bytes[2]))
+     if((AccelDataOld.bytes[0] != AccelDataNew.bytes[0]) ||
+        (AccelDataOld.bytes[1] != AccelDataNew.bytes[1]) ||
+        (AccelDataOld.bytes[2] != AccelDataNew.bytes[2]))
     {
-      Packet_Put(CMD_ACCEL, accelDataNew.bytes[0], accelDataNew.bytes[1], accelDataNew.bytes[2]);
+      Packet_Put(CMD_ACCEL, AccelDataNew.bytes[0], AccelDataNew.bytes[1], AccelDataNew.bytes[2]);
       LEDs_Toggle(LED_GREEN);
     }
   }
@@ -515,7 +515,7 @@ static void AccelThread(void* pData)
     // wait for FIFO or UART to signal
     OS_SemaphoreWait(AccelSemaphore,0);
 
-    Accel_ReadXYZ(accelDataNew.bytes);
+    Accel_ReadXYZ(AccelDataNew.bytes);
   }
 }
 
@@ -542,16 +542,16 @@ static void I2CThread(void* pData)
     }
 
     // Populate newest array
-    accelData[0].bytes[0] = accelDataNew.bytes[0];
-    accelData[0].bytes[1] = accelDataNew.bytes[1];
-    accelData[0].bytes[2] = accelDataNew.bytes[2];
+    accelData[0].bytes[0] = AccelDataNew.bytes[0];
+    accelData[0].bytes[1] = AccelDataNew.bytes[1];
+    accelData[0].bytes[2] = AccelDataNew.bytes[2];
 
     // Median filters the last 3 sets of XYZ data
     for (uint8_t i = 0; i < 3; i++)
-      accelDataNew.bytes[i] = Median_Filter3(accelData[0].bytes[i], accelData[1].bytes[i], accelData[2].bytes[i]);
+      AccelDataNew.bytes[i] = Median_Filter3(accelData[0].bytes[i], accelData[1].bytes[i], accelData[2].bytes[i]);
 
     // Send data back to PC
-    Packet_Put(CMD_ACCEL, accelDataNew.bytes[0], accelDataNew.bytes[1], accelDataNew.bytes[2]);
+    Packet_Put(CMD_ACCEL, AccelDataNew.bytes[0], AccelDataNew.bytes[1], AccelDataNew.bytes[2]);
     LEDs_Toggle(LED_GREEN);
   }
 }
